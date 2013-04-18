@@ -1,10 +1,12 @@
 # Gemfile
-source :rubygems
+source 'https://rubygems.org'
 
 gem "sinatra"
-gem "sinatra-reloader"
 gem "populr"
-gem "haml"
-gem 'pry'
-gem 'pry-nav'
-gem 'pry-stack_explorer'
+
+group :development, :test do
+  gem 'pry'
+  gem 'pry-nav'
+  gem 'pry-stack_explorer'
+  gem "sinatra-reloader"
+end

@@ -13,6 +13,10 @@ before do
   end
 end
 
+get "/" do
+  redirect('/index.html')
+end
+
 get "/_/templates" do
   begin
     return "API Key Required" unless params[:api_key]
