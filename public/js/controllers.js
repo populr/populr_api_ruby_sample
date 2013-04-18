@@ -1,24 +1,30 @@
-'use strict';
-
 /* Controllers */
 
 angular.module('myApp.controllers', []).
   controller('MyCtrl1', ['$scope', 'Templates', 'Pops', function($scope, Templates, Pops) {
 
-    $scope.api_key = 'UXXMOCJW-BKSLPCFI-UQAQFWLO';
+    $scope.api_key = '';
     $scope.selected_template = null;
     $scope.pop_data = {tags: {}, regions: {}};
     $scope.pop_slug = ''
     $scope.pop_errors = {tags: {}, regions: {}};
     $scope.creating = false;
 
+    $scope.environments = [{name: 'production'},{name: 'staging'},{name: 'localhost'}]
+    $scope.env = $scope.environments[0];
+
     $scope.fetch_templates = function() {
-      Templates.index({api_key:$scope.api_key}, function(templates){
+      Templates.index({api_key:$scope.api_key, api_env: $scope.env.name}, function(templates){
         $scope.templates = templates
       });
     }
 
     $scope.fetch_templates()
+
+    $scope.select_environment = function(option) {
+      $scope.env = option;
+      $scope.fetch_templates();
+    }
 
     $scope.class_for_template = function(template) {
       if ($scope.selected_template == template)
@@ -66,6 +72,7 @@ angular.module('myApp.controllers', []).
 
       Pops.create({
         api_key: $scope.api_key,
+        api_env: $scope.env,
         slug: $scope.pop_slug,
         pop_data: $scope.pop_data,
         template_id: $scope.selected_template._id

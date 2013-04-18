@@ -7,11 +7,11 @@
 // In this case it is a simple value service.
 var module = angular.module('myApp.services', ['ngResource'])
 var templates = function($resource) {
-  return $resource('/_/templates', {}, {index: { method: 'GET', isArray: true, params:{api_key:'@api_key'}}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
+  return $resource('/_/templates', {}, {index: { method: 'GET', isArray: true, params:{api_key:'@api_key', api_env:'@api_env'}}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
 }
 
 var pops = function($resource) {
-  return $resource('/_/pops', {}, {index: { method: 'GET', isArray: true, params: {api_key:'@api_key'}}, create: {method: 'POST'}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
+  return $resource('/_/pops', {}, {index: { method: 'GET', isArray: true, params: {api_key:'@api_key', api_env:'@api_env'}}, create: {method: 'POST'}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
 }
 
 module.value('version', '0.1');

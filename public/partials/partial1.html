@@ -1,7 +1,7 @@
 
 	<div class="row">
 		<div class="span4 sidebar" style="background-color:#ececec; height:100%; padding-left:10px; padding-top:10px;">
-      <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Populr API Key" style="width:276px;">
+      <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px;">
 
       <div class="todo mrm">
         <div class="todo-search">
@@ -18,6 +18,17 @@
           </li>
         </ul>
       </div>
+
+      <div class="dk_container dk_shown dk_theme_default" style="width:290px;" id="dk_container_herolist" tabindex="1">
+        <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
+
+        <div class="dk_options" style="top: 38px; ">
+          <ul class="dk_options_inner">
+            <li ng-repeat="option in environments" class="{true:'dk_option_current',false:''}[env == option]"><a ng-click="select_environment(option)">{{option.name}}</a></li>
+          </ul>
+        </div>
+      </div>
+
     </div> <!-- /templates list -->
 
     <div ng-show="selected_template">

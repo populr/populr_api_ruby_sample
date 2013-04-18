@@ -11,6 +11,17 @@ before do
     body_parameters = request.body.read
     params.merge!(JSON.parse(body_parameters))
   end
+
+  if params[:api_key]
+    if params[:api_env] == 'localhost'
+      @populr = Populr.new(params[:api_key], "api.lvh.me:3000")
+    elsif params[:api_env] == 'staging'
+      @populr = Populr.new(params[:api_key], "api.populrstaging.com")
+    else
+      @populr = Populr.new(params[:api_key])
+    end
+  end
+
 end
 
 get "/" do
@@ -19,9 +30,8 @@ end
 
 get "/_/templates" do
   begin
-    return "API Key Required" unless params[:api_key]
-    populr = Populr.new(params[:api_key])
-    JSON.generate(populr.templates.as_json)
+    return "API Key Required" unless @populr
+    JSON.generate(@populr.templates.as_json)
   rescue Populr::AccessDenied
     return JSON.generate({"error" => "API Key Rejected"})
   end
@@ -29,14 +39,9 @@ end
 
 post "/_/pops" do
   begin
-    puts params
+    return "API Key Required" unless @populr
 
-    return "API Key Required" unless params[:api_key]
-    return "Template ID Required" unless params[:template_id]
-
-    populr = Populr.new(params[:api_key])
-    template = populr.templates.find(params[:template_id])
-
+    template = @populr.templates.find(params[:template_id])
     return "Template Not Found" unless template
 
     p = Pop.new(template)
@@ -52,7 +57,7 @@ post "/_/pops" do
         open(tempfile.path, 'w') do |f|
           f << open(url).read
         end
-        asset = populr.images.build(tempfile, 'Filepicker File').save!
+        asset = @populr.images.build(tempfile, 'Filepicker File').save!
         assets.push(asset)
       end
       p.populate_region(region, assets)
