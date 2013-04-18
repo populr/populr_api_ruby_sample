@@ -1,9 +1,3 @@
-PATH
-  remote: vendor/populr
-  specs:
-    populr (0.1.2)
-      rest-client (>= 1.6)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -15,6 +9,8 @@ GEM
       tilt
     method_source (0.8)
     mime-types (1.22)
+    populr (0.1.3)
+      rest-client (>= 1.6)
     pry (0.9.10)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -51,7 +47,7 @@ PLATFORMS
 
 DEPENDENCIES
   haml
-  populr!
+  populr
   pry
   pry-nav
   pry-stack_explorer
