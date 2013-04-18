@@ -14,9 +14,9 @@ before do
 
   if params[:api_key]
     if params[:api_env] == 'localhost'
-      @populr = Populr.new(params[:api_key], "api.lvh.me:3000")
+      @populr = Populr.new(params[:api_key], "http://api.lvh.me:3000")
     elsif params[:api_env] == 'staging'
-      @populr = Populr.new(params[:api_key], "api.populrstaging.com")
+      @populr = Populr.new(params[:api_key], "https://api.populrstaging.com")
     else
       @populr = Populr.new(params[:api_key])
     end
