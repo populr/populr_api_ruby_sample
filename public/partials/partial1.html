@@ -1,0 +1,58 @@
+
+	<div class="row">
+		<div class="span4 sidebar" style="background-color:#ececec; height:100%; padding-left:10px; padding-top:10px;">
+      <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Populr API Key" style="width:276px;">
+
+      <div class="todo mrm">
+        <div class="todo-search">
+          <input class="todo-search-field" type="search" value="" placeholder="Search" />
+        </div>
+        <ul>
+          <li ng-repeat="template in templates" ng-click="select_template(template)" class="{{class_for_template(template)}}">
+            <div class="todo-icon fui-new-24"></div>
+            <div class="todo-content">
+              <h4 class="todo-name">{{template.name}}</h4>
+              <span ng-repeat="label in template.label_names">{{label}}</span>
+              <span ng-show="template.label_names.length == 0">No Labels</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div> <!-- /templates list -->
+
+    <div ng-show="selected_template">
+  		<div class="offset5 span8" style="padding-top:30px;">
+        <h3>Create a '{{selected_template.name}}' pop:
+
+      <div class="row">
+
+        <div class="span4">
+          <div class="control-group">
+            <h4>Slug</h4>
+            <input type="text" value="" class="span4" ng-model="pop_slug" ng-blur="sanitize_slug()"/>
+          </div>
+
+          <div ng-repeat="tag in selected_template.api_tags" class="control-group {{class_for_tag_input(tag)}}">
+            <h4>{{tag}}</h4>
+            <input type="text" value="" placeholder="Your {{tag}}" class="span4" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid()"/>
+          </div>
+        </div>
+
+        <div class="span4">
+          <div ng-repeat="region in selected_template.api_regions" class="span4 control-group {{class_for_region_input(region)}}">
+            <h4>{{region}}</h4>
+            <input droppable type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{region}}', event.fpfiles)">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span8">
+          <hr></hr>
+          <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create_pop()">Create Pop</a>
+          <a ng-show="creating" class="btn btn-primary btn-large btn-block">Creating Pop...</a>
+        </div>
+      </div>
+    </div>
+
+	</div>
