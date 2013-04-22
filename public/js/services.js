@@ -11,7 +11,7 @@ var templates = function($resource) {
 }
 
 var pops = function($resource) {
-  return $resource('/_/pops', {}, {index: { method: 'GET', isArray: true, params: {api_key:'@api_key', api_env:'@api_env'}}, create: {method: 'POST'}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
+  return $resource('/_/pops', {}, {index: { method: 'GET', isArray: true, params: {api_key:'@api_key', api_env:'@api_env', template_id: '@template_id'}}, create: {method: 'POST'}, update: { method: 'PUT' }, destroy: { method: 'DELETE' }})
 }
 
 module.value('version', '0.1');

@@ -17,8 +17,10 @@ before do
       @populr = Populr.new(params[:api_key], "http://api.lvh.me:3000")
     elsif params[:api_env] == 'staging'
       @populr = Populr.new(params[:api_key], "https://api.populrstaging.com")
-    else
+    elsif params[:api_env] == 'production'
       @populr = Populr.new(params[:api_key])
+    else
+      raise "Environment not set! Please choose one of the three options."
     end
   end
 
@@ -31,11 +33,36 @@ end
 get "/_/templates" do
   begin
     return "API Key Required" unless @populr
-    JSON.generate(@populr.templates.as_json)
+    objects = []
+    @populr.templates.all.each do |model|
+      objects.push(model.as_json)
+    end
+    JSON.generate(objects)
   rescue Populr::AccessDenied
     return JSON.generate({"error" => "API Key Rejected"})
   end
 end
+
+get "/_/pops" do
+  begin
+    return "API Key Required" unless @populr
+    objects = []
+    if params[:template_id]
+      collection = @populr.templates.find(params[:template_id]).pops
+    else
+      collection = @populr.pops
+    end
+
+    collection.each do |model|
+      objects.push(model.as_json)
+    end
+    JSON.generate(objects)
+
+  rescue Populr::AccessDenied
+    return JSON.generate({"error" => "API Key Rejected"})
+  end
+end
+
 
 post "/_/pops" do
   begin
@@ -45,22 +72,32 @@ post "/_/pops" do
     return "Template Not Found" unless template
 
     p = Pop.new(template)
-    p.slug = params[:slug]
+    p.slug = params[:pop_data]['slug']
     for tag,value in params[:pop_data]['tags']
       p.populate_tag(tag, value)
     end
 
-    for region,urls in params[:pop_data]['regions']
+    for region,urls in params[:pop_data]['file_regions']
       assets = []
       for url in urls
         tempfile = Tempfile.new('filepicker')
         open(tempfile.path, 'w') do |f|
           f << open(url).read
         end
-        asset = @populr.images.build(tempfile, 'Filepicker File').save!
+
+        if p.type_of_unpopulated_region(region) == 'image'
+          asset = @populr.images.build(tempfile, 'Filepicker Image').save!
+        elsif p.type_of_unpopulated_region(region) == 'document'
+          asset = @populr.documents.build(tempfile, 'Filepicker File').save!
+        end
         assets.push(asset)
       end
       p.populate_region(region, assets)
+    end
+
+    for region,html in params[:pop_data]['embed_regions']
+      asset = @populr.embeds.build(html).save!
+      p.populate_region(region, asset)
     end
 
     if p.unpopulated_api_tags.count == 0 && p.unpopulated_api_regions.count == 0

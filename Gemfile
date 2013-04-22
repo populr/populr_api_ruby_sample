@@ -2,7 +2,7 @@
 source 'https://rubygems.org'
 
 gem "sinatra"
-gem "populr"
+gem "populr", :path => 'vendor/populr_api_ruby'
 
 group :development, :test do
   gem 'pry'

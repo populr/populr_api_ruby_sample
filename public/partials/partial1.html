@@ -22,7 +22,7 @@
       <div class="dk_container dk_shown dk_theme_default" style="width:290px;" id="dk_container_herolist" tabindex="1">
         <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
 
-        <div class="dk_options" style="top: 38px; ">
+        <div class="dk_options" style="top: 38px;">
           <ul class="dk_options_inner">
             <li ng-repeat="option in environments" class="{true:'dk_option_current',false:''}[env == option]"><a ng-click="select_environment(option)">{{option.name}}</a></li>
           </ul>
@@ -32,38 +32,77 @@
     </div> <!-- /templates list -->
 
     <div ng-show="selected_template">
-  		<div class="offset5 span8" style="padding-top:30px;">
-        <h3>Create a '{{selected_template.name}}' pop:
 
-      <div class="row">
-
-        <div class="span4">
-          <div class="control-group">
-            <h4>Slug</h4>
-            <input type="text" value="" class="span4" ng-model="pop_slug" ng-blur="sanitize_slug()"/>
-          </div>
-
-          <div ng-repeat="tag in selected_template.api_tags" class="control-group {{class_for_tag_input(tag)}}">
-            <h4>{{tag}}</h4>
-            <input type="text" value="" placeholder="Your {{tag}}" class="span4" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid()"/>
-          </div>
-        </div>
-
-        <div class="span4">
-          <div ng-repeat="region in selected_template.api_regions" class="span4 control-group {{class_for_region_input(region)}}">
-            <h4>{{region}}</h4>
-            <input droppable type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{region}}', event.fpfiles)">
+      <div class="span11" style="margin-left: 327px;">
+        <div class="navbar navbar-inverse">
+          <div class="navbar-inner">
+            <div class="container">
+              <div class="nav-collapse collapse">
+                <ul class="nav" style="margin-left:70px;">
+                  <li ng-class="{true:'active',false:''}[selected_tab == 'create']">
+                    <a ng-click="selected_tab='create'">
+                      Create a '{{selected_template.name}}' Pop
+                    </a>
+                  </li>
+                  <li ng-class="{true:'active',false:''}[selected_tab == 'view']">
+                    <a ng-click="selected_tab='view'">
+                      Finished '{{selected_template.name}}' Pops
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="row">
+  		<div class="offset5 span8" style="padding-top:30px;" ng-switch="selected_tab">
+        <div ng-switch-when="create" class="row">
+
+          <div class="span4">
+            <div class="control-group">
+              <h4>Slug</h4>
+              <input type="text" value="" class="span4" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
+            </div>
+
+            <div ng-repeat="tag in selected_template.api_tags" class="control-group {{class_for_tag_input(tag)}}">
+              <h4>{{tag}}</h4>
+              <input type="text" value="" placeholder="Your {{tag}}" class="span4" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid()"/>
+            </div>
+          </div>
+
+          <div class="span4">
+            <div ng-repeat="(key,attributes) in selected_template.api_regions" class="span4 control-group {{class_for_region_input(key)}}">
+              <h4>{{key}}</h4>
+              <div ng-switch="attributes['type']">
+                <div ng-switch-when="embed">
+                  <textarea ng-model="pop_data.embed_regions[key]" class="span4"></textarea>
+                </div>
+                <div ng-switch-default>
+                  Select one or more {{attributes['type']}}s below.
+                  <input droppable type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="span8">
+            <hr></hr>
+            <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create_pop()">Create Pop</a>
+            <a ng-show="creating" class="btn btn-primary btn-large btn-block">Creating Pop...</a>
+          </div>
+
+        </div>
+
+      <div ng-switch-when="view" class="row">
         <div class="span8">
-          <hr></hr>
-          <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create_pop()">Create Pop</a>
-          <a ng-show="creating" class="btn btn-primary btn-large btn-block">Creating Pop...</a>
+          <ul>
+            <li ng-repeat="pop in selected_template_pops">
+              <h4><a href="{{pop.published_pop_url}}">{{pop.name}}</a> - {{pop.created_at}}</h4></li>
+          </ul>
+
         </div>
       </div>
-    </div>
 
+    </div>
 	</div>
