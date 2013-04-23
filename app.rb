@@ -6,25 +6,22 @@ register Sinatra::Reloader
 
 set :public_folder, File.dirname(__FILE__) + '/public'
 
+environments = {
+  "localhost"  => "http://api.lvh.me:3000",
+  "staging"    => "https://api.populrstaging.com",
+  "production" => nil}
+
+
 before do
   if request.request_method == "POST"
     body_parameters = request.body.read
     params.merge!(JSON.parse(body_parameters))
   end
 
-  if params[:api_key]
-    if params[:api_env] == 'localhost'
-      @populr = Populr.new(params[:api_key], "http://api.lvh.me:3000")
-    elsif params[:api_env] == 'staging'
-      @populr = Populr.new(params[:api_key], "https://api.populrstaging.com")
-    elsif params[:api_env] == 'production'
-      @populr = Populr.new(params[:api_key])
-    else
-      raise "Environment not set! Please choose one of the three options."
-    end
-  end
-
+  @populr = Populr.new(params[:api_key], environments[params[:api_env]]) if params[:api_key]
+  halt "API Key Required" if request.path.include?('_/') && !@populr
 end
+
 
 get "/" do
   redirect('/index.html')
@@ -32,87 +29,108 @@ end
 
 get "/_/templates" do
   begin
-    return "API Key Required" unless @populr
-    objects = []
-    @populr.templates.all.each do |model|
-      objects.push(model.as_json)
-    end
-    JSON.generate(objects)
+    return collection_listing(@populr.templates)
   rescue Populr::AccessDenied
-    return JSON.generate({"error" => "API Key Rejected"})
+    halt JSON.generate({"error" => "API Key Rejected"})
   end
 end
 
 get "/_/pops" do
   begin
-    return "API Key Required" unless @populr
-    objects = []
     if params[:template_id]
-      collection = @populr.templates.find(params[:template_id]).pops
+      return collection_listing(@populr.templates.find(params[:template_id]).pops)
     else
-      collection = @populr.pops
+      return collection_listing(@populr.pops)
     end
-
-    collection.each do |model|
-      objects.push(model.as_json)
-    end
-    JSON.generate(objects)
 
   rescue Populr::AccessDenied
-    return JSON.generate({"error" => "API Key Rejected"})
+    halt JSON.generate({"error" => "API Key Rejected"})
   end
 end
 
 
 post "/_/pops" do
   begin
-    return "API Key Required" unless @populr
-
     template = @populr.templates.find(params[:template_id])
     return "Template Not Found" unless template
 
+    # First, create a new pop from the template
     p = Pop.new(template)
+
+    # Assign it's title, slug, and other properties
     p.slug = params[:pop_data]['slug']
+
+    # Fill in {{tags}} in the body of the pop using the
+    # values the user has provided in the pop_data parameter
     for tag,value in params[:pop_data]['tags']
       p.populate_tag(tag, value)
     end
 
+    # Fill in the regions that require files - image regions
+    # and document regions. Our filepicker.io interface gives
+    # us a URL to each file, and we need to create Populr assets
+    # for each one. Each region on Populr can accept multiple
+    # images / documents, so we allow for multiple selection.
     for region,urls in params[:pop_data]['file_regions']
       assets = []
       for url in urls
-        tempfile = Tempfile.new('filepicker')
-        open(tempfile.path, 'w') do |f|
-          f << open(url).read
-        end
-
         if p.type_of_unpopulated_region(region) == 'image'
-          asset = @populr.images.build(tempfile, 'Filepicker Image').save!
+          asset = create_asset_for_url(url, @populr.images)
         elsif p.type_of_unpopulated_region(region) == 'document'
-          asset = @populr.documents.build(tempfile, 'Filepicker File').save!
+          asset = create_asset_for_url(url, @populr.documents)
         end
         assets.push(asset)
       end
       p.populate_region(region, assets)
     end
 
+    # Fill in embed regions by creating new embed assets with the
+    # HTML the user provided. Each embed region should only have one
+    # HTML asset in it, so this is more straightforward.
     for region,html in params[:pop_data]['embed_regions']
       asset = @populr.embeds.build(html).save!
       p.populate_region(region, asset)
     end
 
-    if p.unpopulated_api_tags.count == 0 && p.unpopulated_api_regions.count == 0
-      p.save!
-      p.publish!
-      return JSON.generate(p.as_json)
-    else
-      return JSON.generate({"error" => "Please fill all of the tags and regions."})
+    # As a sanity check, make sure we've filled all the regions and tags.
+    # Populr won't let us publish a pop with unpopulated areas left in it!
+    unless p.unpopulated_api_tags.count == 0 && p.unpopulated_api_regions.count == 0
+      halt JSON.generate({"error" => "Please fill all of the tags and regions."})
     end
 
+    # Save the pop. This commits our changes above.
+    p.save!
+
+    # Publish the pop. This makes it available at http://p.domain/p.slug.
+    # The pop model is updated with a valid published_pop_url after this line!
+    p.publish!
+
+    return JSON.generate(p.as_json)
+
   rescue Populr::AccessDenied
-    return JSON.generate({"error" => "API Key Rejected"})
+    halt JSON.generate({"error" => "API Key Rejected"})
   rescue Populr::APIError => e
-    return JSON.generate({"error" => "An error occurred! #{e.message}"})
+    halt JSON.generate({"error" => "An error occurred! #{e.message}"})
   end
+end
+
+
+private
+
+def create_asset_for_url(url, collection)
+  tempfile = Tempfile.new('filepicker')
+  open(tempfile.path, 'w') do |f|
+    f << open(url).read
+  end
+  asset = collection.build(tempfile, 'Filepicker Asset').save!
+end
+
+def collection_listing(collection)
+  objects = []
+  collection.each do |model|
+    objects.push(model.as_json)
+  end
+  JSON.generate(objects)
 end
 
 
