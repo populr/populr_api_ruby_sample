@@ -74,10 +74,11 @@ post "/_/pops" do
     for region,urls in params[:pop_data]['file_regions']
       assets = []
       for url in urls
+        file = tempfile_for_url(url)
         if p.type_of_unpopulated_region(region) == 'image'
-          asset = create_asset_for_url(url, @populr.images)
+            asset = @populr.images.build(file, 'Filepicker Image').save!
         elsif p.type_of_unpopulated_region(region) == 'document'
-          asset = create_asset_for_url(url, @populr.documents)
+            asset = @populr.documents.build(file, 'Filepicker Document').save!
         end
         assets.push(asset)
       end
@@ -117,12 +118,12 @@ end
 
 private
 
-def create_asset_for_url(url, collection)
+def tempfile_for_url(url)
   tempfile = Tempfile.new('filepicker')
   open(tempfile.path, 'w') do |f|
     f << open(url).read
   end
-  asset = collection.build(tempfile, 'Filepicker Asset').save!
+  tempfile
 end
 
 def collection_listing(collection)
