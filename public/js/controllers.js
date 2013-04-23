@@ -1,7 +1,7 @@
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MyCtrl1', ['$scope', 'Templates', 'Pops', function($scope, Templates, Pops) {
+  controller('MainController', ['$scope', 'Templates', 'Pops', function($scope, Templates, Pops) {
 
     $scope.api_key = 'UXXMOCJW-BKSLPCFI-UQAQFWLO';
     $scope.selected_template = null;
@@ -69,9 +69,8 @@ angular.module('myApp.controllers', []).
       if (!$scope.selected_template)
         return;
 
-      if (!$scope.check_form_valid()) {
+      if (!$scope.check_form_valid())
         return alert('Please fill in all of the fields.');
-      }
 
       $scope.creating = true;
 
@@ -118,9 +117,5 @@ angular.module('myApp.controllers', []).
         $scope.$apply()
       return !error;
     }
-
-  }])
-
-  .controller('MyCtrl2', [function() {
 
   }]);
