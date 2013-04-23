@@ -9,7 +9,7 @@ set :public_folder, File.dirname(__FILE__) + '/public'
 environments = {
   "localhost"  => "http://api.lvh.me:3000",
   "staging"    => "https://api.populrstaging.com",
-  "production" => nil}
+  "production" => "https://api.populr.me"}
 
 
 before do
