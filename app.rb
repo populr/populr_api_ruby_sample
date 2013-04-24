@@ -1,10 +1,14 @@
 require 'populr'
 require 'json'
 require 'open-uri'
+require 'twilio-ruby'
 
 register Sinatra::Reloader
 
 set :public_folder, File.dirname(__FILE__) + '/public'
+
+twillio_api_key = nil
+twillio_secret = nil
 
 environments = {
   "localhost"  => "http://api.lvh.me:3000",
@@ -34,6 +38,19 @@ get "/_/templates" do
     halt JSON.generate({"error" => "API Key Rejected"})
   end
 end
+
+post "/callback/tracer_viewed" do
+  return unless twillio_api_key
+  clicks = params[:tracer]['analytics']['clicks'] if params[:tracer]['analytics']
+  clicks ||= 0
+  twillio = Twilio::REST::Client.new(twillio_api_key, twillio_secret)
+  twillio.account.sms.messages.create(
+    :from => '+15404405900',
+    :to => params[:tracer]['name'],
+    :body => "Thanks for viewing your pop. You clicked #{clicks} items."
+  )
+end
+
 
 get "/_/pops" do
   begin
@@ -105,6 +122,33 @@ post "/_/pops" do
     # Publish the pop. This makes it available at http://p.domain/p.slug.
     # The pop model is updated with a valid published_pop_url after this line!
     p.publish!
+
+    # Has the user requested a tracer? If so, we've got some work to do...
+    if (params[:pop_data]['tracer_phone'] && !params[:pop_data]['tracer_phone'].empty?)
+      p.password = (0...5).map{(65+rand(26)).chr}.join
+      p.save!
+
+
+      number = params[:pop_data]['tracer_phone'].gsub('-', '').gsub('.', '').gsub(' ', '')
+      number = '+1'+number if number[0..1] != '+1'
+
+      tracer = p.tracers.build
+      tracer.name = number
+      tracer.enable_webhook('http://localhost:5000/callback/tracer_viewed')
+      tracer.save!
+
+      if twillio_api_key
+        twillio = Twilio::REST::Client.new(twillio_api_key, twillio_secret)
+        twillio.account.sms.messages.create(
+          :from => '+15404405900',
+          :to => number,
+          :body => "POP POP! Visit #{p.published_pop_url}?#{tracer.code} to view #{p.title}. Use pass #{p.password}."
+        )
+      else
+        puts "POP POP! Visit #{p.published_pop_url}?#{tracer.code} to view #{p.title}. Use pass #{p.password}."
+      end
+    end
+
 
     return JSON.generate(p.as_json)
 
