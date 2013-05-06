@@ -27,6 +27,9 @@ class PopCreationJob
   field :queued_rows, :type => Array, :default => []
   field :finished_rows_status, :type => Array, :default => []
   field :failed_row_count, :type => Integer, :default => 0
+  field :delivery_action, :default => 'publish'
+  field :delivery_passwords, :default => false
+  field :delivery_two_factor_passwords, :default => false
   field :finished, :default => false
   field :email
 end
@@ -42,9 +45,9 @@ Thread.new do
 
     delivery = {
       :action => 'publish',
-      :password => true,
-      :password_sms => false,
-      :confirmation_email => false
+      :password => job.delivery_passwords,
+      :password_sms => job.delivery_two_factor_passwords,
+      :confirmation_email => true
     }
 
     begin
@@ -220,6 +223,10 @@ post "/_/templates/:template_id/csv" do
 
   job = PopCreationJob.new(:api_key => params[:api_key], :api_environment => params[:api_env])
   job.template_id = params[:template_id]
+  job.delivery_action = params[:delivery_action]
+  job.delivery_passwords = params[:delivery_passwords]
+  job.delivery_two_factor_passwords = params[:delivery_two_factor_passwords]
+
   csv = params['file'][:tempfile].read
   job.queued_rows = csv.split("\r")[1..-1]
   job.email = params[:email]

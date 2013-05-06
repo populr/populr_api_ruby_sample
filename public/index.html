@@ -161,23 +161,62 @@
 
         <div ng-switch-when="batch" class="row">
           <div class="span8">
-            <h3>Create Pops from a CSV File</h3>
-            <h4>Step 1: Download CSV Template</h4>
+            <h3>Step 1: Download CSV Template</h3>
             <p>The template contains columns for each field in this pop. Fill the spreadsheet with your data so that one row in the spreadsheet corresponds to one pop. To add documents and other media to regions in a pop, put a comma-separated list of URLs in the cell.
             </p>
             <a href="/_/templates/{{selected_template._id}}/csv?api_key={{api_key}}&api_env={{env.name}}" target="_blank" class="btn">Download</a>
             <br>
             <br>
-            <h4>Step 2: Upload Filled CSV File</h4>
-            <p>If you're using Excel, simply close the file and attach it below. Make sure that you <strong>do not</strong> resave the document in another format, such as .xls or .xlsx.
+            <br>
+            <h3>Step 2: Submit Job</h3>
 
             <form method="POST" action="/_/templates/{{selected_template._id}}/csv" enctype="multipart/form-data" >
               <input type="hidden" value="{{api_key}}" name="api_key">
               <input type="hidden" value="{{env.name}}" name="api_env">
+              <input type="hidden" value="{{csv_action}}" name="delivery_action">
 
+              <h4>Upload Filled CSV File</h4>
+              <p>If you're using Excel, simply close the file and attach it below. Make sure that you <strong>do not</strong> resave the document in another format, such as .xls or .xlsx.
+              <p>
               <input type="file" name="file"/>
-              <input type="text" placeholder="Email Address" name="email"/>
-              <input type="submit" class="btn" value="Upload CSV" accept="text/csv" required="required">
+              <p>
+              <br>
+              <h4>Choose an Action for Each Row</h4>
+              <p>You'll receive an email at this address when your job has been processed.</p>
+
+              <div class="dk_container dk_shown dk_theme_default" style="width:222px;">
+                <a class="dk_toggle">
+                  <span class="dk_label" ng-show="!csv_action">Select an option...</span>
+                  <span class="dk_label" ng-show="csv_action=='publish'">Publish the Pop</span>
+                  <span class="dk_label" ng-show="csv_action=='clone'">Invite to Clone</span>
+                  <span class="dk_label" ng-show="csv_action=='collaborate'">Invite to Collaborate</span>
+                <span class="select-icon"></span></a>
+                <div class="dk_options" style="top: 38px;">
+                  <ul class="dk_options_inner">
+                    <li><a ng-click="csv_action='publish'">Publish the Pop</a></li>
+                    <li><a ng-click="csv_action='clone'">Invite to Clone</a></li>
+                    <li><a ng-click="csv_action='collaborate'">Invite to Collaborate</a></li>
+                  </ul>
+                </div>
+              </div>
+              <br><br>
+
+              <div ng-show="csv_action=='publish'">
+                <h4>Password Protection</h4>
+                <input id="csv-password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="csv_password_enableds" name="delivery_passwords"/><label for="csv-password-check">Protect the pop with a randomly generated password.</label>
+                <br>
+                <input id="csv-two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!csv_password_enableds" name="delivery_two_factor_passwords"/><label for="csv-two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
+                <br><br>
+              </div>
+
+
+              <h4>Enter a Followup Email Address</h4>
+              <p>You'll receive an email at this address when your job has been processed.</p>
+
+              <input type="text" placeholder="Email Address" class="span4" name="email"/>
+              <p>
+                <hr></hr>
+              <input type="submit" class="btn btn-large btn-info" value="Process Job" accept="text/csv" required="required">
             </form>
           </div>
         </div>
