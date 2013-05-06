@@ -7,29 +7,24 @@ require 'mongoid'
 require 'pony'
 require 'erb'
 require 'ostruct'
+require 'sinatra/r18n'
 
-class EmbedRecord
+include R18n::Helpers
+
+class PopDeliveryConfiguration
   include Mongoid::Document
   field :api_key
-  field :api_environment
+  field :api_env
   field :template_id
-  field :action
-  field :confirmation
-  field :password_sms_enabled
-  field :password_enabled
+  field :delivery_config
 end
 
-class PopCreationJob
-  include Mongoid::Document
-  field :api_key
-  field :api_environment
-  field :template_id
+class PopEmbed < PopDeliveryConfiguration; end
+
+class PopCreationJob < PopDeliveryConfiguration
   field :queued_rows, :type => Array, :default => []
   field :finished_rows_status, :type => Array, :default => []
   field :failed_row_count, :type => Integer, :default => 0
-  field :delivery_action, :default => 'publish'
-  field :delivery_passwords, :default => false
-  field :delivery_two_factor_passwords, :default => false
   field :finished, :default => false
   field :email
 end
@@ -38,21 +33,15 @@ Thread.new do
   while true do
     job = PopCreationJob.where(:finished => false).first
     unless job
-      puts 'no job'
       sleep 1
       next
     end
 
-    delivery = {
-      :action => 'publish',
-      :password => job.delivery_passwords,
-      :password_sms => job.delivery_two_factor_passwords,
-      :confirmation_email => true
-    }
-
     begin
-      @populr = Populr.new(job.api_key, environments[job.api_environment])
+      @populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
       @template = @populr.templates.find(job.template_id)
+
+      puts "Processing job with delivery config: #{job.delivery_config}"
 
       for row in job.queued_rows
         data = {'file_regions' => {}, 'tags' => {}, 'embed_regions' => {}}
@@ -78,30 +67,31 @@ Thread.new do
 
         puts "processing row: #{row.to_json}"
         begin
-          create_and_send_pop(@template, data, delivery, user_email, user_phone) { |destination_url, pop|
+          create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) { |destination_url, pop|
             job.finished_rows_status.push(['true', destination_url, pop.password])
-            return JSON.generate({"redirect_url" => destination_url})
           }
         rescue Exception => e
           job.finished_rows_status.push(['false', "\"#{e.to_s}\"", ''])
           job.failed_row_count += 1
         end
+        puts "processed row with delivery #{user_email}, #{user_phone}"
       end
 
-
     rescue Exception => e
+      puts e.to_s
       send_notification(job.email, {
-        :instructions => "Your job could not be processed successfully. Popul8 produced the error #{e.to_s}",
+        :instructions => t.job.exception_thrown(e.to_s),
         :url => '',
         :password => nil
       })
     else
       send_notification(job.email, {
-        :instructions => "Your job has been completed successfully. There were #{job.failed_row_count} failures. Click the link below to view those rows.",
+        :instructions => t.job.successful_with_errors(job.failed_row_count),
         :url => "http://populr8.com/job_results/#{job._id}",
         :password => nil
       })
     ensure
+      puts "Finished Job #{job._id}. Final email delivered to #{job.email}"
       job.finished = true
       job.save!
     end
@@ -133,9 +123,7 @@ configure do
 end
 
 register Sinatra::Reloader
-
 set :public_folder, File.dirname(__FILE__) + '/public'
-
 
 before do
   if request.request_method == "POST"
@@ -148,20 +136,12 @@ before do
 end
 
 
-def environments
-  {
-  "localhost"  => "http://api.lvh.me:3000",
-  "staging"    => "https://api.populrstaging.com",
-  "production" => "https://api.populr.me"
-  }
-end
-
 def find_api_connection
-  @populr = Populr.new(params[:api_key], environments[params[:api_env]]) if params[:api_key]
+  @populr = Populr.new(params[:api_key], url_for_environment_named(params[:api_env])) if params[:api_key]
 
   if params[:embed]
-    @embed = EmbedRecord.find(params[:embed])
-    @populr = Populr.new(@embed.api_key, environments[@embed.api_environment])
+    @embed = PopEmbed.find(params[:embed])
+    @populr = Populr.new(@embed.api_key, url_for_environment_named(@embed.api_env))
     @template = @populr.templates.find(@embed.template_id)
   end
 
@@ -181,7 +161,7 @@ post "/callback/tracer_viewed" do
   twillio.account.sms.messages.create(
     :from => ENV["TWILLIO_NUMBER"],
     :to => params[:tracer]['name'],
-    :body => "Thanks for viewing your pop. You clicked #{clicks} items."
+    :body => t.tracer_callback.sms(clicks)
   )
 end
 
@@ -221,11 +201,14 @@ post "/_/templates/:template_id/csv" do
   find_api_connection
   template = @populr.templates.find(params[:template_id])
 
-  job = PopCreationJob.new(:api_key => params[:api_key], :api_environment => params[:api_env])
+  job = PopCreationJob.new(:api_key => params[:api_key], :api_env => params[:api_env])
   job.template_id = params[:template_id]
-  job.delivery_action = params[:delivery_action]
-  job.delivery_passwords = params[:delivery_passwords]
-  job.delivery_two_factor_passwords = params[:delivery_two_factor_passwords]
+  job.delivery_config = {
+      'action' => params[:delivery_action],
+      'password' => params[:delivery_passwords] != nil,
+      'password_sms' => params[:delivery_two_factor_passwords] != nil,
+      'confirmation_email' => true
+  }
 
   csv = params['file'][:tempfile].read
   job.queued_rows = csv.split("\r")[1..-1]
@@ -237,10 +220,12 @@ end
 
 get "/job_results/:job" do
   job = PopCreationJob.find(params[:job])
-  populr = Populr.new(job.api_key, environments[job.api_environment])
+  populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
 
-  csv = csv_template_headers(template) + "Success,URL,Password\r"
+  csv = csv_template_headers(template)
+  csv += "Recipient Email,Recipient Phone\n"
+  csv += "Success,URL,Password\r"
   job.queued_rows.count.times do |i|
     csv += job.queued_rows[i] + ',' + job.finished_rows_status[i].join(',') + "\r"
   end
@@ -264,10 +249,16 @@ post "/_/embeds" do
   return JSON.generate({"error" => "Please provide required fields."}) unless params[:api_key] && params[:api_env] && params[:template_id]
 
   find_api_connection
-  properties = {:api_key => params[:api_key], :api_environment => params[:api_env], :template_id => params[:template_id], :action => params[:action], :confirmation => params[:confirmation], :password_enabled => params[:password_enabled], :password_sms_enabled => params[:password_sms_enabled]}
-  embed = EmbedRecord.where(properties).first
+  delivery_config = {
+    'action' => params[:action],
+    'password' => params[:password_enabled] != nil,
+    'password_sms' => params[:password_sms_enabled] != nil,
+    'confirmation_email' => params[:confirmation]
+  }
+  properties = {:api_key => params[:api_key], :api_env => params[:api_env], :template_id => params[:template_id], :delivery_config => delivery_config}
+  embed = PopEmbed.where(properties).first
   if !embed
-    embed = EmbedRecord.new(properties)
+    embed = PopEmbed.new(properties)
     embed.save!
   end
   return embed.to_json if embed
@@ -282,14 +273,8 @@ post "/_/embeds/:embed/build_pop" do
     user_email = params[:pop_data]['popul8_recipient_email']
     user_phone = sanitize_phone_number(params[:pop_data]['popul8_recipient_phone'])
     data = params[:pop_data]
-    delivery = {
-      :action => @embed.action,
-      :password => @embed.password,
-      :password_sms => @embed.password_sms_enabled,
-      :confirmation_email => @embed.confirmation
-    }
 
-    create_and_send_pop(@template, data, delivery, user_email, user_phone) { |destination_url|
+    create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |destination_url|
       return JSON.generate({"redirect_url" => destination_url})
     }
 
@@ -355,25 +340,20 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 
   # Publish the pop. This makes it available at http://p.domain/p.slug.
   # The pop model is updated with a valid published_pop_url after this line!
-  if delivery[:action] == 'publish'
+  if delivery['action'] == 'publish'
     p.publish!
 
-    if delivery[:confirmation_email]
-      if delivery[:password_sms]
+    if delivery['confirmation_email']
+      if delivery['password_sms']
         send_notification(user_email, {
-          :instructions => "Click the link below to view your page. For security, you'll need to enter a password which was sent to your mobile phone (#{user_phone}) in a text message.",
+          :instructions => t.delivery.email.publish_with_sms(user_phone),
           :url => p.published_pop_url,
           :password => nil
         })
-        twillio = Twilio::REST::Client.new(ENV["TWILLIO_API_KEY"], ENV["TWILLIO_API_SECRET"])
-        twillio.account.sms.messages.create(
-          :from => '+15404405900',
-          :to => user_phone,
-          :body => "POP POP! The password for your new pop is #{p.password}."
-        )
+        send_sms(user_phone, t.delivery.sms.password(p.password))
       else
         send_notification(user_email, {
-          :instructions => "Click the link below to view your page.",
+          :instructions => t.delivery.email.publish,
           :url => p.published_pop_url,
           :password => p.password
         })
@@ -381,22 +361,22 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     end
     yield p.published_pop_url, p
 
-  elsif delivery[:action] == 'clone'
+  elsif delivery['action'] == 'clone'
     p.enable_cloning!
-    if delivery[:confirmation_email]
+    if delivery['confirmation_email']
       send_notification(user_email, {
-        :instructions => 'Click the link below and follow the instructions to create a Populr.me account and continue editing your new page!',
+        :instructions => t.delivery.email.clone,
         :url => p.clone_link_url,
         :password => nil
       })
     end
     yield p.clone_link_url, p
 
-  elsif delivery[:action] == 'collaborate'
+  elsif delivery['action'] == 'collaborate'
     p.enable_collaboration!
-    if delivery[:confirmation_email]
+    if delivery['confirmation_email']
       send_notification(user_email, {
-        :instructions => 'Click the link below and follow the instructions to create a Populr.me account and customize your new page!',
+        :instructions => t.delivery.email.collaborate,
         :url => p.collaboration_link_url,
         :password => nil
       })
@@ -419,7 +399,6 @@ def csv_template_headers(template)
   csv
 end
 
-
 def tempfile_for_url(url)
   return unless url[0..3] == 'http'
   tempfile = Tempfile.new('filepicker')
@@ -437,14 +416,32 @@ def send_notification(email, locals)
     :headers => {'Content-Type' => 'text/html'},
     :body => rhtml.result(OpenStruct.new(locals).instance_eval { binding })
   )
+  puts "Sent email #{email}:#{locals}"
 end
 
+def send_sms(phone, body)
+  twillio = Twilio::REST::Client.new(ENV["TWILLIO_API_KEY"], ENV["TWILLIO_API_SECRET"])
+  twillio.account.sms.messages.create(
+    :from => '+15404405900',
+    :to => phone,
+    :body => body
+  )
+  puts "Sent SMS #{phone}:#{body}"
+end
 
 def sanitize_phone_number(phone)
   return nil unless phone
   phone = phone.gsub('-', '').gsub('.', '').gsub(' ', '')
   phone = '+1'+phone if phone[0..1] != '+1'
   phone
+end
+
+def url_for_environment_named(env)
+  {
+    "localhost"  => "http://api.lvh.me:3000",
+    "staging"    => "https://api.populrstaging.com",
+    "production" => "https://api.populr.me"
+  }[env]
 end
 
 def collection_listing(collection)

@@ -8,6 +8,7 @@ gem "mongo"
 gem "bson_ext", "1.1.5"
 gem "twilio-ruby"
 gem "pony"
+gem "sinatra-r18n"
 
 group :development, :test do
   gem 'pry'
