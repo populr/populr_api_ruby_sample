@@ -1,20 +1,50 @@
+PATH
+  remote: vendor/populr_api_ruby
+  specs:
+    populr (0.1.3)
+      rest-client (>= 1.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
+    activemodel (3.2.13)
+      activesupport (= 3.2.13)
+      builder (~> 3.0.0)
+    activesupport (3.2.13)
+      i18n (= 0.6.1)
+      multi_json (~> 1.0)
     backports (3.3.0)
     binding_of_caller (0.7.1)
       debug_inspector (>= 0.0.1)
-    builder (3.2.0)
+    bson (1.8.5)
+    bson_ext (1.1.5)
+    builder (3.0.4)
     coderay (1.0.9)
     debug_inspector (0.0.2)
     eventmachine (1.0.3)
+    i18n (0.6.1)
     jwt (0.1.8)
       multi_json (>= 1.5)
+    mail (2.5.3)
+      i18n (>= 0.4.0)
+      mime-types (~> 1.16)
+      treetop (~> 1.4.8)
     method_source (0.8.1)
     mime-types (1.23)
+    mongo (1.8.5)
+      bson (~> 1.8.5)
+    mongo_ext (0.19.3)
+    mongoid (3.1.3)
+      activemodel (~> 3.2)
+      moped (~> 1.4.2)
+      origin (~> 1.0)
+      tzinfo (~> 0.3.22)
+    moped (1.4.5)
     multi_json (1.7.2)
-    populr (0.1.5)
-      rest-client (>= 1.6)
+    origin (1.1.0)
+    polyglot (0.3.3)
+    pony (1.4)
+      mail (> 2.0)
     pry (0.9.12)
       coderay (~> 1.0.5)
       method_source (~> 0.8)
@@ -42,23 +72,35 @@ GEM
       rack-test
       sinatra (~> 1.4.2)
       tilt (~> 1.3)
+    sinatra-mongoid (0.0.2)
+      mongo_ext
+      mongoid
+      sinatra
     sinatra-reloader (1.0)
       sinatra-contrib
     slop (3.4.4)
     tilt (1.3.7)
+    treetop (1.4.12)
+      polyglot
+      polyglot (>= 0.3.1)
     twilio-ruby (3.9.0)
       builder (>= 2.1.2)
       jwt (>= 0.1.2)
       multi_json (>= 1.3.0)
+    tzinfo (0.3.37)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  populr
+  bson_ext (= 1.1.5)
+  mongo
+  pony
+  populr!
   pry
   pry-nav
   pry-stack_explorer
   sinatra
+  sinatra-mongoid
   sinatra-reloader
   twilio-ruby

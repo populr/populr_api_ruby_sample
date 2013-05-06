@@ -2,44 +2,188 @@
 <html lang="en" ng-app="myApp">
 <head>
   <meta charset="utf-8">
-  <title>My AngularJS App</title>
-
-    <!-- Loading Bootstrap -->
-    <link href="css/bootstrap.css" rel="stylesheet">
-
-    <!-- Loading Flat UI -->
-    <link href="css/flat-ui.css" rel="stylesheet">
+  <title>Popul8</title>
+  <link href="css/bootstrap.css" rel="stylesheet">
+  <link href="css/flat-ui.css" rel="stylesheet">
 
   <link rel="stylesheet" href="css/app.css"/>
 </head>
 <body>
 
+  <div class="container-fluid" style="min-height:100%;">
+    <div ng-view></div>
 
-<div class="container-fluid" style="min-height:100%;">
-  <div ng-view></div>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular-resource.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/directives.js"></script>
 
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
-  -->
-  <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
+  	<script src="js/flat-ui/jquery-1.8.2.min.js"></script>
+    <script src="js/flat-ui/custom_checkbox_and_radio.js"></script>
+  	<script src="js/flat-ui/jquery-ui-1.10.0.custom.min.js"></script>
+  	<script src="js/flat-ui/jquery.dropkick-1.0.0.js"></script>
+  	<script src="js/flat-ui/jquery.placeholder.js"></script>
 
-  <script src="lib/angular/angular.js"></script>
-  <script src="lib/angular/angular-resource.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/filters.js"></script>
-  <script src="js/directives.js"></script>
+    <div class="row" ng-controller="MainController">
+      <div class="span4 sidebar" style="background-color:#ececec; height:100%; padding-left:10px; padding-top:10px;">
+        <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px;">
+
+        <div class="todo mrm">
+          <div class="todo-search">
+            <input class="todo-search-field" type="search" value="" placeholder="Search" />
+          </div>
+          <ul>
+            <li ng-repeat="template in templates" ng-click="select_template(template)" class="{{class_for_template(template)}}">
+              <div class="todo-icon fui-new-24"></div>
+              <div class="todo-content">
+                <h4 class="todo-name">{{template.name}}</h4>
+                <span ng-repeat="label in template.label_names">{{label}}</span>
+                <span ng-show="template.label_names.length == 0">No Labels</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="dk_container dk_shown dk_theme_default" style="width:290px;">
+          <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
+          <div class="dk_options" style="top: 38px;">
+            <ul class="dk_options_inner">
+              <li ng-repeat="option in environments" class="{true:'dk_option_current',false:''}[env == option]"><a ng-click="select_environment(option)">{{option.name}}</a></li>
+            </ul>
+          </div>
+        </div>
+
+      </div> <!-- /templates list -->
+
+      <div ng-show="selected_template">
+
+        <div class="span11" style="margin-left: 327px;">
+          <div class="navbar navbar-inverse">
+            <div class="navbar-inner">
+              <div class="container">
+                <div class="nav-collapse collapse">
+                  <ul class="nav" style="margin-left:70px;">
+                    <li ng-class="{true:'active',false:''}[selected_tab == 'create']">
+                      <a ng-click="selected_tab='create'">
+                        Create a '{{selected_template.name}}' Form
+                      </a>
+                    </li>
+                    <li ng-class="{true:'active',false:''}[selected_tab == 'batch']">
+                      <a ng-click="selected_tab='batch'">
+                        Bulk Import from CSV
+                      </a>
+                    </li>
+                    <li ng-class="{true:'active',false:''}[selected_tab == 'view']">
+                      <a ng-click="selected_tab='view'">
+                        Finished '{{selected_template.name}}' Pops
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="offset5 span8" style="padding-top:30px;" ng-switch="selected_tab">
+          <div ng-switch-when="create" class="row">
+            <div ng-show="selected_embed._id">
+              <h4>Link to this Form:</h4>
+              <div style="position:absolute;height:0;"><a target="_blank" style="position:relative;top:12px;left:590px;" href="{{popul8_url()}}/forms/{{selected_embed._id}}">
+                Open in New Tab
+              </a></div>
+
+              <textarea onclick="$(this).select();" style="width:700px; height:22px;">{{popul8_url()}}/forms/{{selected_embed._id}}</textarea>
+
+              <h4>Embed this Form:</h4>
+              <textarea onclick="$(this).select();" style="width:700px; height:40px;">
+<iframe src="forms/{{selected_embed._id}}" style="width:700px; height:800px;" seamless></iframe>
+              </textarea>
+
+              <h4>Preview:</h4>
+              <iframe ng-src="/forms/{{selected_embed._id}}" src="/" style="width:710px; height:600px; border:2px solid #dce4ec;">
+              </iframe>
+
+            </div>
+
+            <div ng-show="!selected_embed._id">
+
+              <h3>Create a Form For '{{selected_template.name}}'</h3>
+              <p>
+                The form will allow users to fill in the fields you defined in the pop and upload images and documents to fill API regions. The pops collected by this form will appear under 'Finished Pops' above.
+              </p>
+              <br>
+              <h4>After filling in the form...</h4>
+              <div class="dk_container dk_shown dk_theme_default" style="width:222px;">
+                <a class="dk_toggle">
+                  <span class="dk_label" ng-show="!selected_embed.action">Select an option...</span>
+                  <span class="dk_label" ng-show="selected_embed.action=='publish'">Publish the Pop</span>
+                  <span class="dk_label" ng-show="selected_embed.action=='clone'">Invite to Clone</span>
+                  <span class="dk_label" ng-show="selected_embed.action=='collaborate'">Invite to Collaborate</span>
+                <span class="select-icon"></span></a>
+                <div class="dk_options" style="top: 38px;">
+                  <ul class="dk_options_inner">
+                    <li><a ng-click="selected_embed.action='publish'">Publish the Pop</a></li>
+                    <li><a ng-click="selected_embed.action='clone'">Invite to Clone</a></li>
+                    <li><a ng-click="selected_embed.action='collaborate'">Invite to Collaborate</a></li>
+                  </ul>
+                </div>
+              </div>
+              <br><br>
+
+              <h4>Email Delivery</h4>
+                <input id="confirmation-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="selected_embed.confirmation" checked="checked" /><label for="confirmation-check">Ask for an email address, and send a link to the pop to the address provided.</label>
+              <br>
+              <div ng-show="selected_embed.action=='publish' && selected_embed.confirmation">
+                <h4>Password Protection</h4>
+                <input id="password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="selected_embed.password_enabled" /><label for="password-check">Protect the pop with a randomly generated password.</label>
+                <br>
+                <input id="two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!selected_embed.password_enabled" ng-model="selected_embed.password_sms_enabled" /><label for="two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
+              </div>
 
 
-	<script src="js/flat-ui/jquery-1.8.2.min.js"></script>
-	<script src="js/flat-ui/jquery-ui-1.10.0.custom.min.js"></script>
-	<script src="js/flat-ui/jquery.dropkick-1.0.0.js"></script>
-	<script src="js/flat-ui/custom_checkbox_and_radio.js"></script>
-	<script src="js/flat-ui/custom_radio.js"></script>
-	<script src="js/flat-ui/jquery.tagsinput.js"></script>
-	<script src="js/flat-ui/bootstrap-tooltip.js"></script>
-	<script src="js/flat-ui/jquery.placeholder.js"></script>
-	
+              <hr></hr>
+              <a class="btn btn-info btn-large" ng-click="create_embed()">Create Pop Form</a>
+            </div>
+          </div>
+
+        <div ng-switch-when="view" class="row">
+          <div class="span8">
+            <ul>
+              <li ng-repeat="pop in selected_template_pops">
+                <h4><a href="{{pop.published_pop_url}}">{{pop.name}}</a> - {{pop.created_at}}</h4></li>
+            </ul>
+
+          </div>
+        </div>
+
+        <div ng-switch-when="batch" class="row">
+          <div class="span8">
+            <h3>Create Pops from a CSV File</h3>
+            <h4>Step 1: Download CSV Template</h4>
+            <p>The template contains columns for each field in this pop. Fill the spreadsheet with your data so that one row in the spreadsheet corresponds to one pop. To add documents and other media to regions in a pop, put a comma-separated list of URLs in the cell.
+            </p>
+            <a href="/_/templates/{{selected_template._id}}/csv?api_key={{api_key}}&api_env={{env.name}}" target="_blank" class="btn">Download</a>
+            <br>
+            <br>
+            <h4>Step 2: Upload Filled CSV File</h4>
+            <p>If you're using Excel, simply close the file and attach it below. Make sure that you <strong>do not</strong> resave the document in another format, such as .xls or .xlsx.
+
+            <form method="POST" action="/_/templates/{{selected_template._id}}/csv" enctype="multipart/form-data" >
+              <input type="hidden" value="{{api_key}}" name="api_key">
+              <input type="hidden" value="{{env.name}}" name="api_env">
+
+              <input type="file" name="file"/>
+              <input type="text" placeholder="Email Address" name="email"/>
+              <input type="submit" class="btn" value="Upload CSV" accept="text/csv" required="required">
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
 </body>
 </html>

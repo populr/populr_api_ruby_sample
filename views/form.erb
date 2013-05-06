@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"  ng-app="myApp">
+<head>
+  <meta charset="utf-8">
+  <link href="/css/bootstrap.css" rel="stylesheet"/>
+  <link href="/css/flat-ui.css" rel="stylesheet"/>
+  <link href="/css/app.css" rel="stylesheet"/>
+  <script type="text/javascript" src="//api.filepicker.io/v1/filepicker.js"></script>
+
+  <script src="/lib/angular/angular.js"></script>
+  <script src="/js/flat-ui/jquery-1.8.2.min.js"></script>
+  <script src="/js/flat-ui/jquery.placeholder.js"></script>
+
+  <script>
+    // Declare app level module which depends on filters, and services
+    angular.module('myApp', ['myApp.directives', 'myApp.controllers']);
+    angular.module('myApp.directives', []).
+      directive( ['focus', 'blur', 'keyup', 'keydown', 'keypress'].reduce( function ( container, name ) {
+        var directiveName = 'ng' + name[ 0 ].toUpperCase( ) + name.substr( 1 );
+
+        container[ directiveName ] = [ '$parse', function ( $parse ) {
+            return function ( scope, element, attr ) {
+                var fn = $parse( attr[ directiveName ] );
+                element.bind( name, function ( event ) {
+                    scope.$apply( function ( ) {
+                        fn( scope, {
+                            $event : event
+                        } );
+                    } );
+                } );
+            };
+        } ];
+        return container;
+    },{}));
+
+
+  angular.module('myApp.controllers', []).
+    controller('FormController', ['$scope', '$http', function($scope, $http) {
+
+      $scope.pop_data = {slug: '', tags: {}, file_regions: {}, embed_regions: {}};
+      $scope.pop_errors = {tags: {}, file_regions: {}, embed_regions: {}};
+      $scope.creating = false;
+      $scope.embed = <%= @embed.as_json(:except=>[:api_key, :api_environment, :template_id]).to_json %>;
+      $scope.template = <%= @template.to_json %>;
+
+      $scope.class_for_tag_input = function(tag) {
+        return ($scope.pop_errors.tags[tag]) ? 'error' : '';
+      }
+
+      $scope.class_for_region_input = function(region_key) {
+        return ($scope.pop_errors.file_regions[region_key]) ? 'error' : '';
+      }
+
+      $scope.files_selected = function(region_key, files) {
+        var urls = []
+        for (var i = 0; i < files.length; i++)
+          urls.push(files[i].url);
+        $scope.pop_data.file_regions[region_key] = urls;
+      }
+
+      $scope.sanitize_slug = function() {
+        $scope.pop_data['slug'] = $scope.pop_data['slug'].replace(/ /g, '-');
+      }
+
+      $scope.creation_description = function() {
+        if ($scope.embed.action == 'publish')
+          return 'Publish Your Page!';
+        if ($scope.embed.action == 'clone')
+          return 'Continue Editing on Populr.me';
+        if ($scope.embed.action == 'collaborate')
+          return 'Continue Editing on Populr.me';
+        return 'Unknown Creation Action';
+      }
+
+      $scope.create = function() {
+        if (!$scope.check_form_valid())
+          return alert('Please fill in all of the fields.');
+
+        $scope.creating = true;
+        $http.post('/_/embeds/' + $scope.embed._id + '/build_pop', {pop_data: $scope.pop_data}).success(function(response){
+          $scope.creating = false;
+          if (response.error)
+            return alert(response.error)
+          else {
+            window.location = response.redirect_url
+          }
+        }).error(function(err) {
+          alert(err);
+        });
+      }
+
+      $scope.check_form_valid = function() {
+        var error = false;
+        for (var i = 0; i < $scope.template.api_tags.length; i++) {
+          var tag = $scope.template.api_tags[i];
+          var unfilled = (!$scope.pop_data.tags[tag] || $scope.pop_data.tags[tag].length == 0)
+          $scope.pop_errors.tags[tag] = unfilled
+          error = unfilled || error
+        }
+
+        var region_keys = Object.keys($scope.template.api_regions);
+        for (var i = 0; i < region_keys.length; i++) {
+          var key = region_keys[i];
+          var attributes = $scope.template.api_regions[key];
+
+          if (attributes['type'] == 'embed') {
+            var unfilled = (!$scope.pop_data.embed_regions[key] || $scope.pop_data.embed_regions[key].length == 0)
+            $scope.pop_errors.embed_regions[key] = unfilled
+          } else {
+            var unfilled = (!$scope.pop_data.file_regions[key] || $scope.pop_data.file_regions[key].length == 0)
+            $scope.pop_errors.file_regions[key] = unfilled
+          }
+          error = unfilled || error
+        }
+
+        if (!$scope.$$phase)
+          $scope.$apply()
+        return !error;
+      }
+
+    }]);
+
+  </script>
+
+</head>
+<body>
+  <div ng-controller="FormController" style="padding:5px; margin:auto; max-width:620px; margin-top:20px; min-height:100%;">
+
+    <div style="float:left; width:50%;">
+      <div class="control-group" style="padding-right:30px;">
+        <h4>Slug</h4>
+        <input type="text" value="" style="width:100%;" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
+      </div>
+
+      <div ng-repeat="tag in template.api_tags" style="padding-right:30px;" class="control-group {{class_for_tag_input(tag)}}">
+        <h4>{{tag}}</h4>
+        <input type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid()"/>
+      </div>
+    </div>
+
+    <div style="float:left; width:50%;">
+      <div ng-repeat="(key,attributes) in template.api_regions" class="control-group {{class_for_region_input(key)}}">
+        <h4>{{key}}</h4>
+        <div ng-switch="attributes['type']">
+          <div ng-switch-when="embed" style="padding-right:15px;">
+            <textarea style="width:100%;" ng-model="pop_data.embed_regions[key]"></textarea>
+          </div>
+          <div ng-switch-default>
+            Select one or more {{attributes['type']}}s below.
+            <input type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr style="clear:both;"></hr>
+
+    <div ng-show="embed.confirmation">
+      <h4>Email Address</h4>
+        <p>A link to your new web page will be emailed to the address you provide.<span ng-show="embed.password_enabled && !embed.password_sms_enabled"> The email contains a password needed to view the page</span>.</p>
+
+      <div style="padding-right:15px;">
+        <input type="text" value="" style="width:100%;" ng-model="pop_data['popul8_recipient_email']"/>
+      </div>
+      <hr></hr>
+    </div>
+
+    <div ng-show="embed.password_sms_enabled">
+      <h4>Phone Number</h4>
+      <p>For security purposes, your page will be protected by two-factor authentication. A password for viewing the page will be sent via SMS while the link to the page is delivered via email. Please type a phone number below.</p>
+      <div style="padding-right:15px;">
+        <input type="text" value="" style="width:250px;" ng-model="pop_data['popul8_recipient_phone']"/>
+      </div>
+      <hr></hr>
+    </div>
+
+    <div style="padding-top:25px;">
+      <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">{{creation_description()}}</a>
+      <a ng-show="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">Popping...</a>
+    </div>
+
+</body>
+</html>
+
+
