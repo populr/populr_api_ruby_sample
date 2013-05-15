@@ -63,11 +63,11 @@
       }
 
       $scope.creation_description = function() {
-        if ($scope.embed.action == 'publish')
+        if ($scope.embed.delivery_config.action == 'publish')
           return 'Publish Your Page!';
-        if ($scope.embed.action == 'clone')
+        if ($scope.embed.delivery_config.action == 'clone')
           return 'Continue Editing on Populr.me';
-        if ($scope.embed.action == 'collaborate')
+        if ($scope.embed.delivery_config.action == 'collaborate')
           return 'Continue Editing on Populr.me';
         return 'Unknown Creation Action';
       }
@@ -155,9 +155,9 @@
 
     <hr style="clear:both;"></hr>
 
-    <div ng-show="embed.confirmation">
+    <div ng-show="embed.delivery_config.confirmation_email">
       <h4>Email Address</h4>
-        <p>A link to your new web page will be emailed to the address you provide.<span ng-show="embed.password_enabled && !embed.password_sms_enabled"> The email contains a password needed to view the page</span>.</p>
+        <p>A link to your new web page will be emailed to the address you provide.<span ng-show="embed.delivery_config.password && !embed.delivery_config.password_sms"> The email contains a password needed to view the page</span>.</p>
 
       <div style="padding-right:15px;">
         <input type="text" value="" style="width:100%;" ng-model="pop_data['popul8_recipient_email']"/>
@@ -165,9 +165,9 @@
       <hr></hr>
     </div>
 
-    <div ng-show="embed.password_sms_enabled">
+    <div ng-show="embed.delivery_config.password_sms">
       <h4>Phone Number</h4>
-      <p>For security purposes, your page will be protected by two-factor authentication. A password for viewing the page will be sent via SMS while the link to the page is delivered via email. Please type a phone number below.</p>
+      <p>For security purposes, your page will be protected by two-factor authentication. A password for viewing the page will be sent via SMS while the link to the page is delivered via email. Please provide your 10-digit cell phone number below.</p>
       <div style="padding-right:15px;">
         <input type="text" value="" style="width:250px;" ng-model="pop_data['popul8_recipient_phone']"/>
       </div>

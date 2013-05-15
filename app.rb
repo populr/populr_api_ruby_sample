@@ -58,12 +58,14 @@ Thread.new do
             data['embed_regions'][region].push(values[vindex])
           else
             data['file_regions'][region] ||= []
-            data['file_regions'][region].push(values[vindex])
+            data['file_regions'][region].concat(values[vindex].split(','))
           end
           vindex += 1
         end
         user_email = values[vindex]
+        user_email = nil if user_email && user_email.empty?
         user_phone = values[vindex+1]
+        user_phone = nil if user_phone && user_phone.empty?
 
         puts "processing row: #{row.to_json}"
         begin
@@ -343,8 +345,8 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   if delivery['action'] == 'publish'
     p.publish!
 
-    if delivery['confirmation_email']
-      if delivery['password_sms']
+    if delivery['confirmation_email'] && user_email
+      if delivery['password_sms'] && user_phone
         send_notification(user_email, {
           :instructions => t.delivery.email.publish_with_sms(user_phone),
           :url => p.published_pop_url,
@@ -366,7 +368,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
-    if delivery['confirmation_email']
+    if delivery['confirmation_email'] && user_email
       send_notification(user_email, {
         :instructions => t.delivery.email.clone,
         :url => p.clone_link_url,
@@ -377,7 +379,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 
   elsif delivery['action'] == 'collaborate'
     p.enable_collaboration!
-    if delivery['confirmation_email']
+    if delivery['confirmation_email'] && user_email
       send_notification(user_email, {
         :instructions => t.delivery.email.collaborate,
         :url => p.collaboration_link_url,
