@@ -188,7 +188,7 @@ end
 
 get "/_/templates/:template_id/csv" do
   find_api_connection
-  template = @populr.templates.find(template_id)
+  template = @populr.templates.find(params[:template_id])
   csv = csv_template_headers(template)
   csv += "Recipient Email,Recipient Phone\n"
 
@@ -215,7 +215,7 @@ post "/_/templates/:template_id/csv" do
   job.email = params[:email]
   job.save!
 
-  redirect('/index.html')
+  redirect('/thanks.html')
 end
 
 get "/job_results/:job" do
@@ -360,6 +360,9 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
       end
     end
     yield p.published_pop_url, p
+
+  elsif delivery['action'] == 'create'
+    yield p._id
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!

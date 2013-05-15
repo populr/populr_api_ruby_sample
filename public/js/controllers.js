@@ -60,6 +60,12 @@ angular.module('myApp.controllers', []).
       });
     }
 
+    $scope.validate_csv_form = function() {
+      if ((!$scope.csv_email) || ($scope.csv_email.length == 0))
+          return false;
+      return true;
+    }
+
     $scope.select_environment($scope.environments[2]);
 
   }]);
