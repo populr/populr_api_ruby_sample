@@ -1,0 +1,26 @@
+# Gemfile
+require "rubygems"
+require "bundler/setup"
+require "sinatra"
+require 'sinatra/base'
+require "sinatra/reloader"
+
+ENV["MONGO_HOST"] = "localhost:27017"
+ENV["MONGO_DB"] = "my_db"
+
+ENV["SENDGRID_USERNAME"] = ""
+ENV["SENDGRID_PASSWORD"] = ""
+ENV["SENDGRID_DOMAIN"] = "smtp.sendgrid.net"
+
+ENV["TWILLIO_API_KEY"] = ''
+ENV["TWILLIO_API_SECRET"] = ''
+ENV["TWILLIO_NUMBER"] = '+15404405900'
+
+ENV["ASSET_ROOT"] = 'http://localhost:5000'
+
+require "./app"
+
+set :run, false
+set :raise_errors, true
+
+run Sinatra::Application
