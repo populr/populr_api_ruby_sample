@@ -112,7 +112,7 @@ configure do
     }
   end
   Pony.options = {
-    :from => "noreply@popul8.me",
+    :from => "noreply@populate.me",
     :via => :smtp,
     :via_options => {
       :address => 'smtp.sendgrid.net',
@@ -288,8 +288,8 @@ post "/_/embeds/:embed/build_pop" do
   begin
     return "Template Not Found" unless @template
 
-    user_email = params[:pop_data]['popul8_recipient_email']
-    user_phone = sanitize_phone_number(params[:pop_data]['popul8_recipient_phone'])
+    user_email = params[:pop_data]['populate_recipient_email']
+    user_phone = sanitize_phone_number(params[:pop_data]['populate_recipient_phone'])
     data = params[:pop_data]
 
     create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |destination_url|
@@ -436,7 +436,7 @@ def send_notification(email, locals)
   rhtml = ERB.new(File.open("views/email.erb", "rb").read)
   Pony.mail(
     :to => email,
-    :subject => 'Popul8 Notification',
+    :subject => 'Populate Notification',
     :headers => {'Content-Type' => 'text/html'},
     :body => rhtml.result(OpenStruct.new(locals).instance_eval { binding })
   )

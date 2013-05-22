@@ -1,5 +1,5 @@
 job:
-  exception_thrown: "Your job could not be processed successfully. Popul8 produced the error %1"
+  exception_thrown: "Your job could not be processed successfully. Populate produced the error %1"
   successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below to view your CSV file with the results appended."
 
 tracer_callback:

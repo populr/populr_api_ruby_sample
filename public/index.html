@@ -2,7 +2,7 @@
 <html lang="en" ng-app="myApp">
 <head>
   <meta charset="utf-8">
-  <title>Popul8</title>
+  <title>Populate</title>
   <link href="css/bootstrap.css" rel="stylesheet">
   <link href="css/flat-ui.css" rel="stylesheet">
 
@@ -53,14 +53,14 @@
         </div>
 
         <p style="text-align:center;">
-          Need help? Check out <a target="_blank" href="http://billboard.populr.me/using-popul8">this pop!</a>
+          Need help? Check out <a target="_blank" href="http://billboard.populr.me/using-populate">this pop!</a>
         </p>
 
       </div> <!-- /templates list -->
 
       <div ng-show="!selected_template">
         <div class="span5" style="margin-left: 355px; margin-top:25px;">
-          <h2>Welcome to Popul8</h2>
+          <h2>Welcome to Populate</h2>
           <p>
             Paste your Populr API key into the box in the top left and then click Search.
             the API templatesi n your account should appear in the list. Choose one to get started.
@@ -69,7 +69,7 @@
             Don't have an API key yet? Visit <a href="http://populr.me">Populr.me</a> to configure your account for API access.
           </p>
           <p>
-            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-popul8"> step-by-step instructions for using Popul8.</a>
+            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-populate"> step-by-step instructions for using Populate.</a>
           </p>
         </div>
       </div>
@@ -107,11 +107,11 @@
           <div ng-switch-when="create" class="row">
             <div ng-show="selected_embed._id">
               <h4>Link to this Form:</h4>
-              <div style="position:absolute;height:0;"><a target="_blank" style="position:relative;top:12px;left:590px;" href="{{popul8_url()}}/forms/{{selected_embed._id}}">
+              <div style="position:absolute;height:0;"><a target="_blank" style="position:relative;top:12px;left:590px;" href="{{populate_url()}}/forms/{{selected_embed._id}}">
                 Open in New Tab
               </a></div>
 
-              <textarea onclick="$(this).select();" style="width:700px; height:22px;">{{popul8_url()}}/forms/{{selected_embed._id}}</textarea>
+              <textarea onclick="$(this).select();" style="width:700px; height:22px;">{{populate_url()}}/forms/{{selected_embed._id}}</textarea>
 
               <h4>Embed this Form:</h4>
               <textarea onclick="$(this).select();" style="width:700px; height:40px;">
@@ -181,7 +181,7 @@
             <p>The template contains columns for each field in this pop. Fill the spreadsheet with your data so that one row in the spreadsheet corresponds to one pop. To add documents and other media to regions in a pop, put a comma-separated list of URLs in the cell.
             </p>
             <p>
-            The recipient name and phone number fields are optional. If you provide email addresses, Popul8 will email the pops it creates to your recipients.
+            The recipient name and phone number fields are optional. If you provide email addresses, Populate will email the pops it creates to your recipients.
             </p>
             <a href="/_/templates/{{selected_template._id}}/csv?api_key={{api_key}}&api_env={{env.name}}" target="_blank" class="btn">Download</a>
             <br>

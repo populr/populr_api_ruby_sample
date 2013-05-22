@@ -18,7 +18,7 @@ angular.module('myApp.controllers', []).
       });
     }
 
-    $scope.popul8_url = function() {
+    $scope.populate_url = function() {
       return window.location.href.substr(0, window.location.href.indexOf('/index'));
     }
 
