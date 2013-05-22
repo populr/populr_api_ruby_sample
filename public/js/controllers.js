@@ -9,6 +9,8 @@ angular.module('myApp.controllers', []).
     $scope.selected_embed = null;
     $scope.show_environments = window.location.href.indexOf('localhost') != -1
     $scope.environments = [{name: 'production'},{name: 'staging'},{name: 'localhost'}]
+    $scope.csv_action = null;
+    $scope.csv_email = null;
 
     $scope.fetch_templates = function() {
       Templates.index({api_key:$scope.api_key, api_env: $scope.env.name}, function(templates){
@@ -61,9 +63,17 @@ angular.module('myApp.controllers', []).
       });
     }
 
-    $scope.validate_csv_form = function() {
-      if ((!$scope.csv_email) || ($scope.csv_email.length == 0))
-          return false;
+    window.validate_csv_form = function() {
+      if (!$("[name='delivery_action']").val()) {
+        alert('Please select a delivery action.')
+        return false;
+      }
+
+      email = $("#delivery_email").val()
+      if ((!email) || (email.length == 0)) {
+        alert('Please provide an email address. The processing results will be sent to you!')
+        return false;
+      }
       return true;
     }
 

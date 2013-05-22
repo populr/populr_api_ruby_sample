@@ -1,17 +1,15 @@
-delivery:
-
 job:
   exception_thrown: "Your job could not be processed successfully. Popul8 produced the error %1"
-  successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below to view those rows."
+  successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below to view your CSV file with the results appended."
 
 tracer_callback:
   sms: "Thanks for viewing your pop. You clicked %1 items."
 
 delivery:
   email:
-    publish:"Click the link below to view your page."
-    publish_with_sms:"Click the link below to view your page. For security, you'll need to enter a password which was sent to your mobile phone (%1) in a text message."
-    clone:'Click the link below and follow the instructions to create a Populr.me account and continue editing your new page!'
-    collaborate:'Click the link below and follow the instructions to create a Populr.me account and customize your new page!'
+    publish: "Click the link below to view your page."
+    publish_with_sms: "Click the link below to view your page. For security, you'll need to enter a password which was sent to your mobile phone (%1) in a text message."
+    clone: 'Click the link below and follow the instructions to create a Populr.me account and continue editing your new page!'
+    collaborate: 'Click the link below and follow the instructions to create a Populr.me account and customize your new page!'
   sms:
     password: "POP POP! The password for your new pop is %1."

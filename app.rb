@@ -8,6 +8,7 @@ require 'pony'
 require 'erb'
 require 'ostruct'
 require 'sinatra/r18n'
+require 'csv'
 
 include R18n::Helpers
 
@@ -44,9 +45,10 @@ Thread.new do
       puts "Processing job with delivery config: #{job.delivery_config}"
 
       for row in job.queued_rows
+        values = CSV.parse_line(row)
         data = {'file_regions' => {}, 'tags' => {}, 'embed_regions' => {}}
-        values = row.split(',')
-        vindex = 0
+        data['slug'] = values.first
+        vindex = 1
 
         for tag in @template.api_tags
           data['tags'][tag] = values[vindex]
@@ -69,8 +71,8 @@ Thread.new do
 
         puts "processing row: #{row.to_json}"
         begin
-          create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) { |destination_url, pop|
-            job.finished_rows_status.push(['true', destination_url, pop.password])
+          create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) { |pop_reference, pop|
+            job.finished_rows_status.push(['true', pop_reference, pop.password])
           }
         rescue Exception => e
           job.finished_rows_status.push(['false', "\"#{e.to_s}\"", ''])
@@ -89,7 +91,7 @@ Thread.new do
     else
       send_notification(job.email, {
         :instructions => t.job.successful_with_errors(job.failed_row_count),
-        :url => "http://populr8.com/job_results/#{job._id}",
+        :url => "https://#{$servername}/job_results/#{job._id}",
         :password => nil
       })
     ensure
@@ -126,6 +128,7 @@ end
 
 register Sinatra::Reloader
 set :public_folder, File.dirname(__FILE__) + '/public'
+$servername = ""
 
 before do
   if request.request_method == "POST"
@@ -184,6 +187,8 @@ end
 # Data Endpoints
 
 get "/_/templates" do
+  $servername = request.host_with_port
+
   find_api_connection
   begin
     return collection_listing(@populr.templates)
@@ -195,8 +200,7 @@ end
 get "/_/templates/:template_id/csv" do
   find_api_connection
   template = @populr.templates.find(params[:template_id])
-  csv = csv_template_headers(template)
-  csv += "Recipient Email,Recipient Phone\n"
+  csv = csv_template_headers(template) + "\n"
 
   response.headers['content_type'] = "text/csv"
   attachment("#{template.name} Template.csv")
@@ -217,11 +221,20 @@ post "/_/templates/:template_id/csv" do
   }
 
   csv = params['file'][:tempfile].read
-  job.queued_rows = csv.split("\r")[1..-1]
-  job.email = params[:email]
-  job.save!
+  csv_lines = csv.split("\r")
+  # ensure that the first row of the CSV file hasn't been tampered with
 
-  redirect('/thanks.html')
+  expected_headers = csv_template_headers(template)
+  actual_headers = csv_lines[0]
+
+  if expected_headers.parse_csv == actual_headers.parse_csv
+    job.queued_rows = csv_lines[1..-1]
+    job.email = params[:email]
+    job.save!
+    redirect('/thanks.html')
+  else
+    halt("Make sure the first row of your CSV file matches the template! The first row should have the following columns: #{expected_headers}")
+  end
 end
 
 get "/job_results/:job" do
@@ -230,13 +243,12 @@ get "/job_results/:job" do
   template = populr.templates.find(job.template_id)
 
   csv = csv_template_headers(template)
-  csv += "Recipient Email,Recipient Phone\n"
-  csv += "Success,URL,Password\r"
+  csv += ",Success,Result,Password\r"
   job.queued_rows.count.times do |i|
     csv += job.queued_rows[i] + ',' + job.finished_rows_status[i].join(',') + "\r"
   end
   response.headers['content_type'] = "text/csv"
-  attachment("Failed Rows.csv")
+  attachment("Results.csv")
   response.write(csv)
 end
 
@@ -295,7 +307,7 @@ private
 
 def create_and_send_pop(template, data, delivery, user_email, user_phone)
   # First, create a new pop from the template
-  p = Pop.new(@template)
+  p = Pop.new(template)
 
   # Assign it's title, slug, and other properties
   p.slug = data['slug']
@@ -315,11 +327,12 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     assets = []
     for url in urls
       file = tempfile_for_url(url)
+      name = url.split('/').last
       next unless file
       if p.type_of_unpopulated_region(region) == 'image'
-          asset = @populr.images.build(file, 'Filepicker Image').save!
+          asset = @populr.images.build(file, name).save!
       elsif p.type_of_unpopulated_region(region) == 'document'
-          asset = @populr.documents.build(file, 'Filepicker Document').save!
+          asset = @populr.documents.build(file, name).save!
       end
       assets.push(asset)
     end
@@ -341,7 +354,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   end
 
   # Save the pop. This commits our changes above.
-  p.password = (0...5).map{(65+rand(26)).chr}.join if delivery[:password]
+  p.password = (0...5).map{(65+rand(26)).chr}.join if delivery['password']
   p.save!
 
   # Publish the pop. This makes it available at http://p.domain/p.slug.
@@ -398,14 +411,16 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 end
 
 def csv_template_headers(template)
-  csv = ""
+  headers = ["Pop Slug"]
   for tag in template.api_tags
-    csv += "#{tag},"
+    headers << "#{tag}"
   end
   for region, info in template.api_regions
-    csv += "#{region},"
+    headers << "#{region}"
   end
-  csv
+  headers << "Recipient Email"
+  headers << "Recipient Phone"
+  headers.to_csv
 end
 
 def tempfile_for_url(url)
@@ -421,7 +436,7 @@ def send_notification(email, locals)
   rhtml = ERB.new(File.open("views/email.erb", "rb").read)
   Pony.mail(
     :to => email,
-    :subject => 'Your Pop!',
+    :subject => 'Popul8 Notification',
     :headers => {'Content-Type' => 'text/html'},
     :body => rhtml.result(OpenStruct.new(locals).instance_eval { binding })
   )

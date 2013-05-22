@@ -52,9 +52,9 @@
           </div>
         </div>
 
-          <p>
-            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-popul8"> step-by-step instructions for using Popul8.</a>
-          </p>
+        <p style="text-align:center;">
+          Need help? Check out <a target="_blank" href="http://billboard.populr.me/using-popul8">this pop!</a>
+        </p>
 
       </div> <!-- /templates list -->
 
@@ -186,7 +186,7 @@
             <br>
             <h3>Step 2: Submit Job</h3>
 
-            <form method="POST" ng-submit="return validate_csv_form();" action="/_/templates/{{selected_template._id}}/csv" enctype="multipart/form-data" >
+            <form method="POST" onsubmit="return validate_csv_form();" action="/_/templates/{{selected_template._id}}/csv" enctype="multipart/form-data" >
               <input type="hidden" value="{{api_key}}" name="api_key">
               <input type="hidden" value="{{env.name}}" name="api_env">
               <input type="hidden" value="{{csv_action}}" name="delivery_action">
@@ -231,7 +231,7 @@
               <h4>Enter a Followup Email Address</h4>
               <p>You'll receive an email at this address when your job has been processed.</p>
 
-              <input type="text" ng-model="csv_email" required="required" placeholder="Email Address" class="span4" name="email"/>
+              <input id="delivery_email" type="text" ng-model="csv_email" required="required" placeholder="Email Address" class="span4" name="email"/>
 
               <p>
               <hr></hr>
