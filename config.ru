@@ -3,7 +3,7 @@ require "rubygems"
 require "bundler/setup"
 require "sinatra"
 require 'sinatra/base'
-require "sinatra/reloader"
+
 require "./app"
 
 set :run, false
