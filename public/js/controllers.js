@@ -2,7 +2,7 @@
 
 angular.module('myApp.controllers', []).
   controller('MainController', ['$scope', 'Templates', 'Embeds', 'Pops', function($scope, Templates, Embeds, Pops) {
-    $scope.api_key = 'UXXMOCJW-BKSLPCFI-UQAQFWLO';
+    $scope.api_key = '';
     $scope.selected_template = null;
     $scope.selected_template_pops = [];
     $scope.selected_tab = 'create';
