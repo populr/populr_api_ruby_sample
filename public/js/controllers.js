@@ -7,6 +7,7 @@ angular.module('myApp.controllers', []).
     $scope.selected_template_pops = [];
     $scope.selected_tab = 'create';
     $scope.selected_embed = null;
+    $scope.show_environments = window.location.href.indexOf('localhost') != -1
     $scope.environments = [{name: 'production'},{name: 'staging'},{name: 'localhost'}]
 
     $scope.fetch_templates = function() {
@@ -66,6 +67,6 @@ angular.module('myApp.controllers', []).
       return true;
     }
 
-    $scope.select_environment($scope.environments[2]);
+    $scope.select_environment($scope.environments[0]);
 
   }]);

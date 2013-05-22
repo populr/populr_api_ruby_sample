@@ -31,9 +31,6 @@
         <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px;">
 
         <div class="todo mrm">
-          <div class="todo-search">
-            <input class="todo-search-field" type="search" value="" placeholder="Search" />
-          </div>
           <ul>
             <li ng-repeat="template in templates" ng-click="select_template(template)" class="{{class_for_template(template)}}">
               <div class="todo-icon fui-new-24"></div>
@@ -46,7 +43,7 @@
           </ul>
         </div>
 
-        <div class="dk_container dk_shown dk_theme_default" style="width:290px;">
+        <div class="dk_container dk_shown dk_theme_default" style="width:290px;" ng-show="show_environments">
           <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
           <div class="dk_options" style="top: 38px;">
             <ul class="dk_options_inner">
@@ -54,6 +51,10 @@
             </ul>
           </div>
         </div>
+
+          <p>
+            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-popul8"> step-by-step instructions for using Popul8.</a>
+          </p>
 
       </div> <!-- /templates list -->
 
@@ -66,6 +67,9 @@
           </p>
           <p>
             Don't have an API key yet? Visit <a href="http://populr.me">Populr.me</a> to configure your account for API access.
+          </p>
+          <p>
+            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-popul8"> step-by-step instructions for using Popul8.</a>
           </p>
         </div>
       </div>

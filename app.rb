@@ -155,6 +155,10 @@ get "/" do
   redirect('/index.html')
 end
 
+get "/help" do
+  redirect('/help.html')
+end
+
 post "/callback/tracer_viewed" do
   return unless ENV["TWILLIO_API_KEY"]
   clicks = params[:tracer]['analytics']['clicks'] if params[:tracer]['analytics']
@@ -364,7 +368,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     yield p.published_pop_url, p
 
   elsif delivery['action'] == 'create'
-    yield p._id
+    yield p._id, p
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
