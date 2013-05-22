@@ -107,7 +107,10 @@ configure do
   Mongoid.configure do |config|
     config.sessions = {
       :default => {
-        :hosts => [ENV["MONGO_HOST"]], :database => ENV["MONGO_DB"]
+        :hosts => [ENV["MONGO_HOST"]],
+        :database => ENV["MONGO_DB"],
+        :password => ENV["MONGO_PASSWORD"],
+        :username => ENV["MONGO_USER"]
       }
     }
   end
@@ -115,12 +118,12 @@ configure do
     :from => "noreply@populate.me",
     :via => :smtp,
     :via_options => {
-      :address => 'smtp.sendgrid.net',
-      :port => '587',
+      :address => ENV['SMTP_MAILHUB'].split(':').first,
+      :port => ENV['SMTP_MAILHUB'].split(':').last,
       :authentication => :plain,
-      :user_name => ENV['SENDGRID_USERNAME'],
-      :password => ENV['SENDGRID_PASSWORD'],
-      :domain => ENV['SENDGRID_DOMAIN'],
+      :user_name => ENV['SMTP_AUTH_USER'],
+      :password => ENV['SMTP_AUTH_PASSWORD'],
+      :domain => ENV['SMTP_MAILHUB'],
       :enable_starttls_auto => true
     },
   }
