@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 
 gem "sinatra"
 gem 'sinatra-mongoid', :require => 'sinatra/mongoid'
-gem "populr", :path => 'vendor/populr_api_ruby'
+gem "populr"
 gem "mongo"
 gem "bson_ext", "1.1.5"
 gem "twilio-ruby"
