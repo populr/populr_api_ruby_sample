@@ -3,6 +3,8 @@ require "rubygems"
 require "bundler/setup"
 require "sinatra"
 require 'sinatra/base'
+require 'rack/ssl'
+
 
 require "./app"
 

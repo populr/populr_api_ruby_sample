@@ -5,6 +5,7 @@ ruby "1.9.3"
 
 gem "sinatra"
 gem 'sinatra-mongoid', :require => 'sinatra/mongoid'
+gem "rack-ssl"
 gem "populr"
 gem "mongo"
 gem "bson_ext", "1.1.5"
