@@ -6,7 +6,7 @@ ruby "1.9.3"
 gem "sinatra"
 gem 'sinatra-mongoid', :require => 'sinatra/mongoid'
 gem "rack-ssl"
-gem "populr"
+gem "populr", "0.1.8"
 gem "mongo"
 gem "bson_ext", "1.1.5"
 gem "twilio-ruby"
