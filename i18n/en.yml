@@ -7,9 +7,9 @@ tracer_callback:
 
 delivery:
   email:
-    publish: "Click the link below to view your page."
+    publish: "You've got a page! Click the link below to view it in your web browser."
     publish_with_sms: "Click the link below to view your page. For security, you'll need to enter a password which was sent to your mobile phone (%1) in a text message."
-    clone: 'Click the link below and follow the instructions to create a Populr.me account and continue editing your new page!'
-    collaborate: 'Click the link below and follow the instructions to create a Populr.me account and customize your new page!'
+    clone: "You've got a page! Click the link below and follow the instructions to create a Populr.me account and continue editing it!"
+    collaborate: "You've got a page! Click the link below and follow the instructions to create a Populr.me account and customize it!"
   sms:
     password: "POP POP! The password for your new pop is %1."
