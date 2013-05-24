@@ -9,6 +9,7 @@ require 'erb'
 require 'ostruct'
 require 'sinatra/r18n'
 require 'csv'
+require 'uri'
 
 include R18n::Helpers
 
@@ -106,13 +107,12 @@ end
 configure do
   Mongoid.configure do |config|
     config.sessions = {
-      :default => {
-        :hosts => [ENV["MONGO_HOST"]],
-        :database => ENV["MONGO_DB"],
-        :password => ENV["MONGO_PASSWORD"],
-        :username => ENV["MONGO_USER"]
-      }
+      :default => {:hosts => [ENV["MONGO_HOST"]], :database => ENV["MONGO_DB"]}
     }
+    if ENV["MONGO_USER"]
+      config.sessions[:default][:username] = ENV["MONGO_USER"]
+      config.sessions[:default][:password] = ENV["MONGO_PASSWORD"]
+    end
   end
   Pony.options = {
     :from => "noreply@populate.me",
@@ -203,7 +203,7 @@ end
 get "/_/templates/:template_id/csv" do
   find_api_connection
   template = @populr.templates.find(params[:template_id])
-  csv = csv_template_headers(template) + "\n"
+  csv = csv_template_headers(template).to_csv
 
   response.headers['content_type'] = "text/csv"
   attachment("#{template.name} Template.csv")
@@ -230,7 +230,7 @@ post "/_/templates/:template_id/csv" do
   expected_headers = csv_template_headers(template)
   actual_headers = csv_lines[0]
 
-  if expected_headers.parse_csv == actual_headers.parse_csv
+  if expected_headers == actual_headers.parse_csv
     job.queued_rows = csv_lines[1..-1]
     job.email = params[:email]
     job.save!
@@ -245,8 +245,8 @@ get "/job_results/:job" do
   populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
 
-  csv = csv_template_headers(template)
-  csv += ",Success,Result,Password\r"
+  csv = csv_template_headers(template) + ["Success", "Result", "Password"]
+  csv = csv.to_csv
   job.queued_rows.count.times do |i|
     csv += job.queued_rows[i] + ',' + job.finished_rows_status[i].join(',') + "\r"
   end
@@ -330,7 +330,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     assets = []
     for url in urls
       file = tempfile_for_url(url)
-      name = url.split('/').last
+      name = URI.decode(url.split('/').last)
       next unless file
       if p.type_of_unpopulated_region(region) == 'image'
           asset = @populr.images.build(file, name).save!
@@ -423,7 +423,7 @@ def csv_template_headers(template)
   end
   headers << "Recipient Email"
   headers << "Recipient Phone"
-  headers.to_csv
+  headers
 end
 
 def tempfile_for_url(url)
