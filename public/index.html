@@ -27,8 +27,24 @@
   	<script src="js/flat-ui/jquery.placeholder.js"></script>
 
     <div class="row" ng-controller="MainController">
+      <div ng-show="!selected_api_key" style="z-index:2; position:absolute; width:100%; height:100%; background:rgba(0,0,0,0.7); text-align:center; padding-top:150px;">
+        <div style="width:400px; display:inline-block; background-color:white; border-radius:7px; border:1px solid #ccc; padding:15px; box-shadow:1px 1px 20px rgba(0,0,0,0.4);">
+          <h2>Welcome to Populate</h2>
+          <p>
+            Paste your Populr API key below to get started:
+          </p>
+          <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px; margin-bottom:20px;">
+          <p>
+            Don't have an API key yet? Visit <a href="http://populr.me">Populr.me</a> to configure your account for API access. Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-populate"> step-by-step instructions for using Populate.</a>
+          </p>
+          <a style="margin-top:30px;" class="btn btn-large btn-primary" ng-click="selected_api_key = true">Continue</a>
+        </div>
+      </div>
+
+
       <div class="span4 sidebar" style="background-color:#ececec; height:100%; padding-left:10px; padding-top:10px;">
-        <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px;">
+
+        <p style="padding:3px;" ng-show="selected_api_key">Your API Key: <span ng-bind="api_key"></span>. <a href="#" ng-click="selected_api_key = false">EDIT</a></p>
 
         <div class="todo mrm">
           <ul>
@@ -60,16 +76,11 @@
 
       <div ng-show="!selected_template">
         <div class="span5" style="margin-left: 355px; margin-top:25px;">
-          <h2>Welcome to Populate</h2>
           <p>
-            Paste your Populr API key into the box in the top left and then click Search.
-            the API templates in your account should appear in the list. Choose one to get started.
+            Select one of the templates in your account from the list on the left to get started.
           </p>
           <p>
-            Don't have an API key yet? Visit <a href="http://populr.me">Populr.me</a> to configure your account for API access.
-          </p>
-          <p>
-            Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-populate"> step-by-step instructions for using Populate.</a>
+            Don't see any templates? Double-check your API key in the upper left, and make sure you've created an API template on Populr.me.
           </p>
         </div>
       </div>
