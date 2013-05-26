@@ -89,6 +89,16 @@
         });
       }
 
+      $scope.tag_display_name = function(tag) {
+        if ($scope.is_textarea_tag(tag))
+          return tag.split('textarea:')[1];
+        return tag;
+      }
+
+      $scope.is_textarea_tag = function(tag) {
+        return tag.toLowerCase().indexOf('textarea:') == 0
+      }
+
       $scope.check_form_valid = function(alert_errors) {
         var error = null;
 
@@ -137,15 +147,17 @@
     </div>
 
     <div ng-repeat="tag in template.api_tags" style="padding-right:20px;" class="control-group {{class_for_tag_input(tag)}}">
-      <h4>{{tag}}</h4>
-      <input type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid(false)"/>
+      <h4>{{tag_display_name(tag)}}</h4>
+      <textarea ng-show="is_textarea_tag(tag)" style="width:100%; height:70px;" ng-model="pop_data.tags[tag]"></textarea>
+
+      <input ng-show="!is_textarea_tag(tag)" type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid(false)"/>
     </div>
 
     <div ng-repeat="(key,attributes) in template.api_regions" class="control-group {{class_for_region_input(key)}}">
       <h4>{{key}}</h4>
       <div ng-switch="attributes['type']">
         <div ng-switch-when="embed" style="padding-right:15px;">
-          <textarea style="width:100%;" ng-model="pop_data.embed_regions[key]"></textarea>
+          <textarea style="width:100%; height:70px;" ng-model="pop_data.embed_regions[key]"></textarea>
         </div>
         <div ng-switch-default>
           Select one or more {{attributes['type']}}s below.
