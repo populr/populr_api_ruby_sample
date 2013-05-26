@@ -73,8 +73,8 @@
       }
 
       $scope.create = function() {
-        if (!$scope.check_form_valid())
-          return alert('Please fill in all of the fields.');
+        if (!$scope.check_form_valid(true))
+          return
 
         $scope.creating = true;
         $http.post('/_/embeds/' + $scope.embed._id + '/build_pop', {pop_data: $scope.pop_data}).success(function(response){
@@ -89,13 +89,14 @@
         });
       }
 
-      $scope.check_form_valid = function() {
-        var error = false;
+      $scope.check_form_valid = function(alert_errors) {
+        var error = null;
+
         for (var i = 0; i < $scope.template.api_tags.length; i++) {
           var tag = $scope.template.api_tags[i];
           var unfilled = (!$scope.pop_data.tags[tag] || $scope.pop_data.tags[tag].length == 0)
           $scope.pop_errors.tags[tag] = unfilled
-          error = unfilled || error
+          error = (unfilled ? "Please fill in the " + tag + " field." : false) || error
         }
 
         var region_keys = Object.keys($scope.template.api_regions);
@@ -110,11 +111,15 @@
             var unfilled = (!$scope.pop_data.file_regions[key] || $scope.pop_data.file_regions[key].length == 0)
             $scope.pop_errors.file_regions[key] = unfilled
           }
-          error = unfilled || error
+          error = (unfilled ? "Please provide a " + key : false) || error
         }
 
         if (!$scope.$$phase)
           $scope.$apply()
+
+        if (error && alert_errors)
+          alert(error);
+
         return !error;
       }
 
@@ -126,29 +131,25 @@
 <body>
   <div ng-controller="FormController" style="padding:5px; margin:auto; max-width:620px; margin-top:20px; min-height:100%;">
 
-    <div style="float:left; width:50%;">
-      <div class="control-group" style="padding-right:30px;">
-        <h4>Slug</h4>
-        <input type="text" value="" style="width:100%;" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
-      </div>
-
-      <div ng-repeat="tag in template.api_tags" style="padding-right:30px;" class="control-group {{class_for_tag_input(tag)}}">
-        <h4>{{tag}}</h4>
-        <input type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid()"/>
-      </div>
+    <div class="control-group" style="padding-right:20px;">
+      <h4>Slug</h4>
+      <input type="text" value="" style="width:100%;" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
     </div>
 
-    <div style="float:left; width:50%;">
-      <div ng-repeat="(key,attributes) in template.api_regions" class="control-group {{class_for_region_input(key)}}">
-        <h4>{{key}}</h4>
-        <div ng-switch="attributes['type']">
-          <div ng-switch-when="embed" style="padding-right:15px;">
-            <textarea style="width:100%;" ng-model="pop_data.embed_regions[key]"></textarea>
-          </div>
-          <div ng-switch-default>
-            Select one or more {{attributes['type']}}s below.
-            <input type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
-          </div>
+    <div ng-repeat="tag in template.api_tags" style="padding-right:20px;" class="control-group {{class_for_tag_input(tag)}}">
+      <h4>{{tag}}</h4>
+      <input type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid(false)"/>
+    </div>
+
+    <div ng-repeat="(key,attributes) in template.api_regions" class="control-group {{class_for_region_input(key)}}">
+      <h4>{{key}}</h4>
+      <div ng-switch="attributes['type']">
+        <div ng-switch-when="embed" style="padding-right:15px;">
+          <textarea style="width:100%;" ng-model="pop_data.embed_regions[key]"></textarea>
+        </div>
+        <div ng-switch-default>
+          Select one or more {{attributes['type']}}s below.
+          <input type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
         </div>
       </div>
     </div>
