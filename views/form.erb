@@ -11,6 +11,14 @@
   <script src="/js/flat-ui/jquery-1.8.2.min.js"></script>
   <script src="/js/flat-ui/jquery.placeholder.js"></script>
 
+  <style>
+  .api-region.error > div {
+    margin-right:7px;
+    padding:7px;
+    border: 2px solid #e74c3c;
+    border-radius:7px;
+  }
+  </style>
   <script>
     // Declare app level module which depends on filters, and services
     angular.module('myApp', ['myApp.directives', 'myApp.controllers']);
@@ -38,7 +46,7 @@
     controller('FormController', ['$scope', '$http', function($scope, $http) {
 
       $scope.pop_data = {slug: '', tags: {}, file_regions: {}, embed_regions: {}};
-      $scope.pop_errors = {tags: {}, file_regions: {}, embed_regions: {}};
+      $scope.pop_errors = {tags: {}, regions: {}};
       $scope.creating = false;
       $scope.embed = <%= @embed.as_json(:except=>[:api_key, :api_environment, :template_id]).to_json %>;
       $scope.template = <%= @template.to_json %>;
@@ -48,7 +56,7 @@
       }
 
       $scope.class_for_region_input = function(region_key) {
-        return ($scope.pop_errors.file_regions[region_key]) ? 'error' : '';
+        return ($scope.pop_errors.regions[region_key]) ? 'error' : '';
       }
 
       $scope.files_selected = function(region_key, files) {
@@ -121,7 +129,7 @@
           var tag = $scope.template.api_tags[i];
           var unfilled = (!$scope.pop_data.tags[tag] || $scope.pop_data.tags[tag].length == 0)
           $scope.pop_errors.tags[tag] = unfilled
-          error = (unfilled ? "Please fill in the " + tag + " field." : false) || error
+          error = (unfilled ? "Please fill in the '" + tag + "' field." : false) || error
         }
 
         var region_keys = Object.keys($scope.template.api_regions);
@@ -131,12 +139,12 @@
 
           if (attributes['type'] == 'embed') {
             var unfilled = (!$scope.pop_data.embed_regions[key] || $scope.pop_data.embed_regions[key].length == 0)
-            $scope.pop_errors.embed_regions[key] = unfilled
+            $scope.pop_errors.regions[key] = unfilled
           } else {
             var unfilled = (!$scope.pop_data.file_regions[key] || $scope.pop_data.file_regions[key].length == 0)
-            $scope.pop_errors.file_regions[key] = unfilled
+            $scope.pop_errors.regions[key] = unfilled
           }
-          error = (unfilled ? "Please provide a " + key : false) || error
+          error = (unfilled ? "Please provide one or more files for the '" + key + "' field.": false) || error
         }
 
         if (!$scope.$$phase)
@@ -168,7 +176,7 @@
       <input ng-show="!is_textarea_tag(tag)" type="text" value="" style="width:100%;" placeholder="Your {{tag}}" ng-model="pop_data.tags[tag]" ng-blur="check_form_valid(false)"/>
     </div>
 
-    <div ng-repeat="(key,attributes) in template.api_regions" class="control-group {{class_for_region_input(key)}}">
+    <div ng-repeat="(key,attributes) in template.api_regions" class="control-group api-region {{class_for_region_input(key)}}">
       <h4 ng-bind-html-unsafe="html_for_text(key)"></h4>
       <div ng-switch="attributes['type']">
         <div ng-switch-when="embed" style="padding-right:15px;">
