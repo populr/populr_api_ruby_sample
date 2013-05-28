@@ -33,11 +33,11 @@
           <p>
             Paste your Populr API key below to get started:
           </p>
-          <input type="text" value="" ng-blur="fetch_templates()" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px; margin-bottom:20px;">
+          <input type="text" value="" ng-blur="fetch_templates()" id="api-key-input" ng-model="api_key" placeholder="Enter Your Populr API Key" style="width:276px; margin-bottom:20px;">
           <p>
             Don't have an API key yet? Visit <a href="http://populr.me">Populr.me</a> to configure your account for API access. Need help? Follow our <a target="_blank" href="http://billboard.populr.me/using-populate"> step-by-step instructions for using Populate.</a>
           </p>
-          <a style="margin-top:30px;" class="btn btn-large btn-primary" ng-click="selected_api_key = true">Continue</a>
+          <a style="margin-top:30px;" class="btn btn-large btn-primary" ng-click="api_key_submitted()">Continue</a>
         </div>
       </div>
 

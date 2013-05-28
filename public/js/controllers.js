@@ -22,6 +22,14 @@ angular.module('myApp.controllers', []).
       return window.location.href.substr(0, window.location.href.indexOf('/index'));
     }
 
+    $scope.api_key_submitted = function () {
+      if ($scope.api_key.length > 0) {
+        $scope.selected_api_key = true;
+      } else {
+        alert('Please paste your Populr API key above. You can find your API key on the Group Settings page of Populr.me.');
+        $('#api-key-input').focus();
+      }
+    }
     $scope.select_environment = function(option) {
       $scope.env = option;
       $scope.selected_template = null;
