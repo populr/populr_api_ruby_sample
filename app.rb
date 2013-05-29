@@ -21,7 +21,10 @@ class PopDeliveryConfiguration
   field :delivery_config
 end
 
-class PopEmbed < PopDeliveryConfiguration; end
+class PopEmbed < PopDeliveryConfiguration
+  field :creator_email
+  field :creator_notification
+end
 
 class PopCreationJob < PopDeliveryConfiguration
   field :queued_rows, :type => Array, :default => []
@@ -129,7 +132,7 @@ configure do
   }
 end
 
-use Rack::SSL
+# use Rack::SSL
 set :public_folder, File.dirname(__FILE__) + '/public'
 $servername = ""
 
@@ -276,7 +279,15 @@ post "/_/embeds" do
     'password_sms' => params[:password_sms_enabled] != nil,
     'confirmation_email' => params[:confirmation]
   }
-  properties = {:api_key => params[:api_key], :api_env => params[:api_env], :template_id => params[:template_id], :delivery_config => delivery_config}
+
+  properties = {
+    :api_key => params[:api_key],
+    :api_env => params[:api_env],
+    :template_id => params[:template_id],
+    :creator_email => params[:creator_email],
+    :creator_notification => params[:creator_notification],
+    :delivery_config => delivery_config
+  }
   embed = PopEmbed.where(properties).first
   if !embed
     embed = PopEmbed.new(properties)
@@ -295,8 +306,16 @@ post "/_/embeds/:embed/build_pop" do
     user_phone = sanitize_phone_number(params[:pop_data]['populate_recipient_phone'])
     data = params[:pop_data]
 
-    create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |destination_url|
-      return JSON.generate({"redirect_url" => destination_url})
+    create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |url, pop|
+      if @embed.creator_notification && @embed.creator_email
+        send_notification(@embed.creator_email, {
+          :instructions => t.embed.pop_created_notification(pop.name),
+          :url => pop.edit_url,
+          :password => nil
+        })
+      end
+
+      return JSON.generate({"redirect_url" => url})
     }
 
   rescue Populr::AccessDenied
@@ -384,7 +403,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     yield p.published_pop_url, p
 
   elsif delivery['action'] == 'create'
-    yield p._id, p
+    yield p.edit_url, p
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
