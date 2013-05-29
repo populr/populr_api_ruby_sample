@@ -61,6 +61,8 @@ angular.module('myApp.controllers', []).
         confirmation: $scope.selected_embed.confirmation,
         password_enabled:  $scope.selected_embed.password_enabled,
         password_sms_enabled: $scope.selected_embed.password_sms_enabled,
+        creator_email: $scope.selected_embed.creator_email,
+        creator_notification: $scope.selected_embed.creator_notification,
         template_id: $scope.selected_template._id
       }, function (embed) {
         if (embed.error)

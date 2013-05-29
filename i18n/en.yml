@@ -5,6 +5,8 @@ job:
 tracer_callback:
   sms: "Thanks for viewing your pop. You clicked %1 items."
 
+embed:
+  pop_created_notification: "A new %1 pop was generated with your form! Click the link below to view it in the editor."
 delivery:
   email:
     publish: "You've got a page! Click the link below to view it in your web browser."

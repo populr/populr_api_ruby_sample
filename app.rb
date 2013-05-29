@@ -31,16 +31,20 @@ class PopCreationJob < PopDeliveryConfiguration
   field :finished_rows_status, :type => Array, :default => []
   field :failed_row_count, :type => Integer, :default => 0
   field :finished, :default => false
+  field :started, :default => false
   field :email
 end
 
 Thread.new do
   while true do
-    job = PopCreationJob.where(:finished => false).first
+    job = PopCreationJob.where(:finished => false, :started => false).first
     unless job
       sleep 1
       next
     end
+
+    job.started = true
+    job.save!
 
     begin
       @populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
@@ -310,7 +314,7 @@ post "/_/embeds/:embed/build_pop" do
       if @embed.creator_notification && @embed.creator_email
         send_notification(@embed.creator_email, {
           :instructions => t.embed.pop_created_notification(pop.name),
-          :url => pop.edit_url,
+          :url => pop._id,
           :password => nil
         })
       end
@@ -403,7 +407,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     yield p.published_pop_url, p
 
   elsif delivery['action'] == 'create'
-    yield p.edit_url, p
+    yield p._id, p
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
