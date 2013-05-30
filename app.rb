@@ -5,7 +5,11 @@ require 'erb'
 require 'csv'
 require 'uri'
 
-use Rack::SSL
+if ENV['DOMAIN'][0..4] == 'https'
+  require 'rack/ssl'
+  use Rack::SSL
+end
+
 set :public_folder, File.dirname(__FILE__) + '/public'
 $servername = ""
 
