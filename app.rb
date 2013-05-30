@@ -102,7 +102,7 @@ post "/_/templates/:template_id/csv" do
       'action' => params[:delivery_action],
       'password' => params[:delivery_passwords] != nil,
       'password_sms' => params[:delivery_two_factor_passwords] != nil,
-      'confirmation_email' => true
+      'send_to_user' => params[:delivery_send_to_user]
   }
 
   csv = params['file'][:tempfile].read
@@ -156,7 +156,7 @@ post "/_/embeds" do
     'action' => params[:action],
     'password' => params[:password_enabled] != nil,
     'password_sms' => params[:password_sms_enabled] != nil,
-    'confirmation_email' => params[:confirmation]
+    'send_to_user' => params[:confirmation]
   }
 
   properties = {
@@ -189,7 +189,7 @@ post "/_/embeds/:embed/build_pop" do
       if @embed.creator_notification && @embed.creator_email
         send_notification(@embed.creator_email, {
           :instructions => t.embed.pop_created_notification(pop.name),
-          :url => pop._id,
+          :url => pop.edit_url,
           :password => nil
         })
       end

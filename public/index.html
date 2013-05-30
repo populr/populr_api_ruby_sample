@@ -223,33 +223,37 @@
               <input type="file" name="file"/>
               <p>
               <br>
-              <h4>Choose an Action for Each Row</h4>
-              <p>You'll receive an automated email at this address when your job has been processed.</p>
-
+              <h4>Row Action</h4>
               <div class="dk_container dk_shown dk_theme_default" style="width:222px;">
                 <a class="dk_toggle">
                   <span class="dk_label" ng-show="!csv_action">Select an option...</span>
-                  <span class="dk_label" ng-show="csv_action=='create'">Create the Pop</span>
-                  <span class="dk_label" ng-show="csv_action=='publish'">Publish the Pop</span>
-                  <span class="dk_label" ng-show="csv_action=='clone'">Invite to Clone</span>
-                  <span class="dk_label" ng-show="csv_action=='collaborate'">Invite to Collaborate</span>
+                  <span class="dk_label" ng-show="csv_action=='create'">Create the Pops</span>
+                  <span class="dk_label" ng-show="csv_action=='publish'">Create and Publish the Pops</span>
+                  <span class="dk_label" ng-show="csv_action=='clone'">Create Clone Links</span>
+                  <span class="dk_label" ng-show="csv_action=='collaborate'">Create Collaboration Links</span>
                 <span class="select-icon"></span></a>
                 <div class="dk_options" style="top: 38px;">
                   <ul class="dk_options_inner">
-                    <li><a ng-click="csv_action='create'">Create the Pop</a></li>
-                    <li><a ng-click="csv_action='publish'">Publish the Pop</a></li>
-                    <li><a ng-click="csv_action='clone'">Invite to Clone</a></li>
-                    <li><a ng-click="csv_action='collaborate'">Invite to Collaborate</a></li>
+                    <li><a ng-click="csv_action='create'">Create the Pops</a></li>
+                    <li><a ng-click="csv_action='publish'">Create and Publish the Pops</a></li>
+                    <li><a ng-click="csv_action='clone'">Create Clone Links</a></li>
+                    <li><a ng-click="csv_action='collaborate'">Create Collaboration Links</a></li>
                   </ul>
                 </div>
               </div>
               <br><br>
 
+              <h4>Pop Delivery</h4>
+              <input id="csv-delivery-check" type="checkbox" style="float:left; margin-right:10px;" name="delivery_send_to_user"/><label for="csv-delivery-check">Send an email to each recipient in the CSV file with a link to their new pop. The emails will be titled 'Populate Notification' and will be sent from noreply@populate.me</label>
+
+              <br><br>
+
+
               <div ng-show="csv_action=='publish'">
                 <h4>Password Protection</h4>
-                <input id="csv-password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="csv_password_enableds" name="delivery_passwords"/><label for="csv-password-check">Protect the pop with a randomly generated password.</label>
+                <input id="csv-password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="csv_password_enabled" name="delivery_passwords"/><label for="csv-password-check">Protect the pop with a randomly generated password.</label>
                 <br>
-                <input id="csv-two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!csv_password_enableds" name="delivery_two_factor_passwords"/><label for="csv-two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
+                <input id="csv-two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!csv_password_enabled" name="delivery_two_factor_passwords"/><label for="csv-two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
                 <br><br>
               </div>
 

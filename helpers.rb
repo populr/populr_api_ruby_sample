@@ -64,7 +64,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   if delivery['action'] == 'publish'
     p.publish!
 
-    if delivery['confirmation_email'] && user_email
+    if delivery['send_to_user'] && user_email
       if delivery['password_sms'] && user_phone
         send_notification(user_email, {
           :instructions => t.delivery.email.publish_with_sms(user_phone),
@@ -83,11 +83,11 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     yield p.published_pop_url, p
 
   elsif delivery['action'] == 'create'
-    yield p._id, p
+    yield p.edit_url, p
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
-    if delivery['confirmation_email'] && user_email
+    if delivery['send_to_user'] && user_email
       send_notification(user_email, {
         :instructions => t.delivery.email.clone,
         :url => p.clone_link_url,
@@ -98,7 +98,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 
   elsif delivery['action'] == 'collaborate'
     p.enable_collaboration!
-    if delivery['confirmation_email'] && user_email
+    if delivery['send_to_user'] && user_email
       send_notification(user_email, {
         :instructions => t.delivery.email.collaborate,
         :url => p.collaboration_link_url,
