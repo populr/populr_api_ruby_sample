@@ -243,10 +243,11 @@
               </div>
               <br><br>
 
-              <h4>Pop Delivery</h4>
-              <input id="csv-delivery-check" type="checkbox" style="float:left; margin-right:10px;" name="delivery_send_to_user"/><label for="csv-delivery-check">Send an email to each recipient in the CSV file with a link to their new pop. The emails will be titled 'Populate Notification' and will be sent from noreply@populate.me</label>
-
+              <div ng-show="csv_action!='create'">
+                <h4>Pop Delivery</h4>
+                <input id="csv-delivery-check" type="checkbox" style="float:left; margin-right:10px;" name="delivery_send_to_user"/><label for="csv-delivery-check">Send an email to each recipient in the CSV file with a link to their new pop. The emails will be titled 'Populate Notification' and will be sent from noreply@populate.me</label>
               <br><br>
+              </div>
 
 
               <div ng-show="csv_action=='publish'">
