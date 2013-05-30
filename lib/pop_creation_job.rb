@@ -11,6 +11,7 @@ class PopCreationJob < PopDeliveryConfiguration
   field :finished, :default => false
   field :started, :default => false
   field :failed_row_count, :default => 0
+  field :hash
   field :email
 
   embeds_many :rows, :class_name => 'PopCreationJobRow'
@@ -24,6 +25,9 @@ class PopCreationJob < PopDeliveryConfiguration
   end
 
   def create_resque_tasks
+    self.hash ||= (0...8).map{(65+rand(26)).chr}.join
+    self.save!
+
     rows.each do | row|
       Resque.enqueue(PopCreationWorker, self._id, row._id)
     end

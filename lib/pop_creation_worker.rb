@@ -67,7 +67,7 @@ class PopCreationWorker
 
         send_notification(job.email, {
           :instructions => t.job.successful_with_errors(job.failed_row_count),
-          :url => "#{ENV["DOMAIN"]}/job_results/#{job._id}",
+          :url => "#{ENV["DOMAIN"]}/job_results/#{job._id}/#{job.hash}",
           :password => nil
         })
       end

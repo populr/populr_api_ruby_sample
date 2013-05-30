@@ -121,8 +121,9 @@ post "/_/templates/:template_id/csv" do
   end
 end
 
-get "/job_results/:job" do
+get "/job_results/:job/:job_hash" do
   job = PopCreationJob.find(params[:job])
+  return halt("Hash doesn't match.") unless job.hash == params[:job_hash]
   populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
 
