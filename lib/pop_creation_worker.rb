@@ -64,8 +64,6 @@ class PopCreationWorker
         flush "Finished Job #{job._id}. Final email delivered to #{job.email}"
         job.finished = true
         job.save!
-        require 'pry'
-        binding.pry
 
         send_notification(job.email, {
           :instructions => t.job.successful_with_errors(job.failed_row_count),
