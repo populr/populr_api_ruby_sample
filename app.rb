@@ -1,9 +1,7 @@
 require 'rubygems'
 require 'json'
-require 'open-uri'
 require 'erb'
 require 'csv'
-require 'uri'
 
 if ENV['DOMAIN'][0..4] == 'https'
   require 'rack/ssl'

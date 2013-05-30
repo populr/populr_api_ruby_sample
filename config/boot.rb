@@ -8,6 +8,8 @@ require 'sinatra/r18n'
 require 'populr'
 require 'resque'
 require 'resque/errors'
+require 'open-uri'
+require 'uri'
 
 require 'lib/pop_delivery_configuration'
 require 'lib/pop_embed'
