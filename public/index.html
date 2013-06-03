@@ -255,7 +255,7 @@
 
               <div ng-show="csv_action=='publish'">
                 <h4>Password Protection</h4>
-                <input id="csv-password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="csv_password_enabled" name="delivery_passwords"/><label for="csv-password-check">Protect the pop with a randomly generated password.</label>
+                <input id="csv-password-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="csv_password_enabled" name="delivery_passwords"/><label for="csv-password-check">Protect the pop with the password listed in the CSV file. If no password is set, choose a randomly generated password.</label>
                 <br>
                 <input id="csv-two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!csv_password_enabled" name="delivery_two_factor_passwords"/><label for="csv-two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
                 <br><br>
