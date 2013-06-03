@@ -19,8 +19,9 @@ class PopCreationWorker
       @template = @populr.templates.find(job.template_id)
 
       data = {'file_regions' => {}, 'tags' => {}, 'embed_regions' => {}}
-      data['slug'] = row.columns.first
-      column_index = 1
+      data['slug'] = row.columns[0]
+      data['password'] = row.columns[1]
+      column_index = 2
 
       for tag in @template.api_tags
         data['tags'][tag] = row.columns[column_index]

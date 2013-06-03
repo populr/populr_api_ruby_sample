@@ -56,7 +56,10 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   end
 
   # Save the pop. This commits our changes above.
-  p.password = (0...5).map{(65+rand(26)).chr}.join if delivery['password']
+  if delivery['password']
+    p.password = data['password']
+    p.password ||= (0...5).map{(65+rand(26)).chr}.join
+  end
   p.save!
 
   # Publish the pop. This makes it available at http://p.domain/p.slug.

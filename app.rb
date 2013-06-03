@@ -209,7 +209,7 @@ private
 
 
 def csv_template_headers(template)
-  headers = ["Pop Slug"]
+  headers = ["Pop Slug", "Pop Password"]
   for tag in template.api_tags
     headers << "#{tag}"
   end
