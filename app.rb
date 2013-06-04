@@ -156,7 +156,8 @@ post "/_/embeds" do
     'action' => params[:action],
     'password' => params[:password_enabled] != nil,
     'password_sms' => params[:password_sms_enabled] != nil,
-    'send_to_user' => params[:confirmation]
+    'send_to_user' => params[:confirmation],
+    'post_delivery_url' => params[:post_delivery_url]
   }
 
   properties = {
@@ -185,7 +186,15 @@ post "/_/embeds/:embed/build_pop" do
     user_phone = sanitize_phone_number(params[:pop_data]['populate_recipient_phone'])
     data = params[:pop_data]
 
-    create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |url, pop|
+    require 'pry'
+    binding.pry
+    if data['slug'].nil? || data['slug'].empty?
+      slug_components = [Time.new.to_i]
+      slug_components << params[:pop_data]['tags']['title'] || params[:pop_data]['tags']['Title'] || nil
+      data['slug'] = slug_components.compact.join('-')
+    end
+
+    create_and_send_pop(@template, data, @embed.delivery_config, user_email, user_phone) { |pop_url, pop|
       if @embed.creator_notification && @embed.creator_email
         send_notification(@embed.creator_email, {
           :instructions => t.embed.pop_created_notification(pop.name),
@@ -194,7 +203,9 @@ post "/_/embeds/:embed/build_pop" do
         })
       end
 
-      return JSON.generate({"redirect_url" => url})
+      next_url = @embed.delivery_config['post_delivery_url']
+      next_url = pop_url if next_url.nil? || next_url.empty?
+      return JSON.generate({"redirect_url" => next_url})
     }
 
   rescue Populr::AccessDenied

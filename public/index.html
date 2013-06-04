@@ -153,12 +153,14 @@
               <div class="dk_container dk_shown dk_theme_default" style="width:222px;">
                 <a class="dk_toggle">
                   <span class="dk_label" ng-show="!selected_embed.action">Select an option...</span>
+                  <span class="dk_label" ng-show="selected_embed.action=='create'">Create the Pop</span>
                   <span class="dk_label" ng-show="selected_embed.action=='publish'">Publish the Pop</span>
                   <span class="dk_label" ng-show="selected_embed.action=='clone'">Invite to Clone</span>
                   <span class="dk_label" ng-show="selected_embed.action=='collaborate'">Invite to Collaborate</span>
                 <span class="select-icon"></span></a>
                 <div class="dk_options" style="top: 38px;">
                   <ul class="dk_options_inner">
+                    <li><a ng-click="selected_embed.action='create'">Create the Pop</a></li>
                     <li><a ng-click="selected_embed.action='publish'">Publish the Pop</a></li>
                     <li><a ng-click="selected_embed.action='clone'">Invite to Clone</a></li>
                     <li><a ng-click="selected_embed.action='collaborate'">Invite to Collaborate</a></li>
@@ -173,7 +175,9 @@
                   <input type="text" ng-model="selected_embed.creator_email" ng-focus="selected_embed.creator_notification=true" placeholder="Your Email Address"/>
                 </div>
 
-                <input id="confirmation-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="selected_embed.confirmation" checked="checked" /><label for="confirmation-check">Ask for an email address, and send the submitter a thank-you email with their link.</label>
+                <div ng-show="selected_embed.action!='create'">
+                  <input id="confirmation-check" type="checkbox" style="float:left; margin-right:10px;" ng-model="selected_embed.confirmation" checked="checked" /><label for="confirmation-check">Ask for an email address, and send the submitter a thank-you email with their link.</label>
+                </div>
               <br>
               <div ng-show="selected_embed.action=='publish' && selected_embed.confirmation">
                 <h4>Password Protection</h4>
@@ -182,6 +186,11 @@
                 <input id="two-factor-check" type="checkbox" style="float:left; margin-right:10px;" ng-disabled="!selected_embed.password_enabled" ng-model="selected_embed.password_sms_enabled" /><label for="two-factor-check">Use two-factor authentication: Ask for a phone number, and deliver the pop link via email and the pop password via SMS.</label>
               </div>
 
+              <div ng-show="selected_embed.action=='create'">
+                <h4>Thank You Page</h4>
+                After submitting the form, take users to the URL below:<br>
+                <input type="text" style="width:400px;" ng-model="selected_embed.post_delivery_url"/>
+              </div>
 
               <hr></hr>
               <a class="btn btn-info btn-large" ng-click="create_embed()">Create Pop Form</a>

@@ -71,6 +71,8 @@
       }
 
       $scope.creation_description = function() {
+        if ($scope.embed.delivery_config.action == 'create')
+          return 'Submit Form';
         if ($scope.embed.delivery_config.action == 'publish')
           return 'Publish Your Page!';
         if ($scope.embed.delivery_config.action == 'clone')
@@ -164,10 +166,12 @@
 <body>
   <div ng-controller="FormController" style="padding:5px; margin:auto; max-width:620px; margin-top:20px; min-height:100%;">
 
-    <div class="control-group" style="padding-right:20px;">
-      <h4>Slug</h4>
-      <input type="text" value="" style="width:100%;" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
-    </div>
+    <% if @embed.delivery_config['delivery_action'] == 'publish' %>
+      <div class="control-group" style="padding-right:20px;">
+        <h4>Slug</h4>
+        <input type="text" value="" style="width:100%;" ng-model="pop_data['slug']" ng-blur="sanitize_slug()"/>
+      </div>
+    <% end %>
 
     <div ng-repeat="tag in template.api_tags" style="padding-right:20px;" class="control-group {{class_for_tag_input(tag)}}">
       <h4 ng-bind-html-unsafe="tag_display_name(tag)"></h4>
