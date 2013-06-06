@@ -63,6 +63,7 @@ end
 get "/forms/:embed" do
   return '' if params[:embed] == 'undefined'
   find_api_connection
+  set :frame_options, "ALLOW *"
   erb :form
 end
 
