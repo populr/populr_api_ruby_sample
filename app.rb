@@ -9,6 +9,7 @@ if ENV['DOMAIN'][0..4] == 'https'
 end
 
 set :public_folder, File.dirname(__FILE__) + '/public'
+set :protection, :except => :frame_option
 $servername = ""
 
 before do
