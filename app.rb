@@ -10,7 +10,7 @@ end
 
 set :public_folder, File.dirname(__FILE__) + '/public'
 set :frame_options, "ALLOW *"
-set :protection, :except => :frame_option
+set :protection, :except => :frame_options
 $servername = ""
 
 before do
