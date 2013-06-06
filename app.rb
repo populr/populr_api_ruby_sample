@@ -9,6 +9,7 @@ if ENV['DOMAIN'][0..4] == 'https'
 end
 
 set :public_folder, File.dirname(__FILE__) + '/public'
+set :frame_options, "ALLOW *"
 set :protection, :except => :frame_option
 $servername = ""
 
@@ -63,7 +64,6 @@ end
 get "/forms/:embed" do
   return '' if params[:embed] == 'undefined'
   find_api_connection
-  set :frame_options, "ALLOW *"
   erb :form
 end
 
