@@ -186,8 +186,6 @@ post "/_/embeds/:embed/build_pop" do
     user_phone = sanitize_phone_number(params[:pop_data]['populate_recipient_phone'])
     data = params[:pop_data]
 
-    require 'pry'
-    binding.pry
     if data['slug'].nil? || data['slug'].empty?
       slug_components = [Time.new.to_i]
       slug_components << params[:pop_data]['tags']['title'] || params[:pop_data]['tags']['Title'] || nil
