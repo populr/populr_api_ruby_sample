@@ -152,7 +152,11 @@ end
 get "/_/pops/csv" do
   find_api_connection
   begin
-    pops = @populr.templates.find(params[:template_id]).pops
+    if params[:template_id]
+      pops = @populr.templates.find(params[:template_id]).pops
+    else
+      pops = @populr.pops
+    end
     csv = ['Pop ID', 'Name', 'Title', 'Slug', 'View URL', 'Edit URL'].to_csv
     pops.each do |pop|
       csv += [pop._id, pop.name, pop.title, pop.slug, pop.published_pop_url, pop.edit_url].to_csv
