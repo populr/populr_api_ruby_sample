@@ -149,6 +149,22 @@ get "/_/pops" do
   end
 end
 
+get "/_/pops/csv" do
+  find_api_connection
+  begin
+    pops = @populr.templates.find(params[:template_id]).pops
+    csv = ['Pop ID', 'Name', 'Title', 'Slug', 'View URL', 'Edit URL'].to_csv
+    pops.each do |pop|
+      csv += [pop._id, pop.name, pop.title, pop.slug, pop.published_pop_url, pop.edit_url].to_csv
+    end
+    response.headers['content_type'] = "text/csv"
+    attachment("Pops.csv")
+    response.write(csv)
+  rescue Populr::AccessDenied
+    halt JSON.generate({"error" => "API Key Rejected"})
+  end
+end
+
 post "/_/embeds" do
   return JSON.generate({"error" => "Please select an action"}) unless params[:action]
   return JSON.generate({"error" => "Please provide required fields."}) unless params[:api_key] && params[:api_env] && params[:template_id]

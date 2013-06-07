@@ -199,6 +199,9 @@
 
         <div ng-switch-when="view" class="row">
           <div class="span8">
+            <p>
+              <a class="btn" href="/_/pops/csv?template_id={{selected_template._id}}&api_key={{api_key}}&api_env={{env.name}}">Download CSV of Pops</a>
+            </p>
             <ul>
               <li ng-repeat="pop in selected_template_pops">
                 <h4><a href="{{pop.published_pop_url}}">{{pop.name}}</a> - {{pop.created_at}} - {{pop.slug}}</h4></li>
