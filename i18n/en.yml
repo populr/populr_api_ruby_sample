@@ -1,0 +1,17 @@
+job:
+  exception_thrown: "Your job could not be processed successfully. Populate produced the error %1"
+  successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below to view your CSV file with the results appended."
+
+tracer_callback:
+  sms: "Thanks for viewing your pop. You clicked %1 items."
+
+embed:
+  pop_created_notification: "A new %1 pop was generated with your form! Click the link below to view it in the editor."
+delivery:
+  email:
+    publish: "You've got a page! Click the link below to view it in your web browser."
+    publish_with_sms: "Click the link below to view your page. For security, you'll need to enter a password which was sent to your mobile phone (%1) in a text message."
+    clone: "You've got a page! Click the link below and follow the instructions to create a Populr.me account and continue editing it!"
+    collaborate: "You've got a page! Click the link below and follow the instructions to create a Populr.me account and customize it!"
+  sms:
+    password: "POP POP! The password for your new pop is %1."

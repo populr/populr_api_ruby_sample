@@ -1,9 +1,20 @@
 # Gemfile
 source 'https://rubygems.org'
 
+ruby "1.9.3"
+
 gem "sinatra"
-gem "populr"
+gem 'sinatra-mongoid', :require => 'sinatra/mongoid'
+gem "rack-ssl"
+gem "populr"#, :path => 'vendor/populr_api_ruby'
+gem 'resque', "~> 1.22.0"
+gem "mongo"
+gem "rake"
+gem 'json', '~> 1.7.7'
+gem "bson_ext", "1.1.5"
 gem "twilio-ruby"
+gem "pony"
+gem "sinatra-r18n"
 
 group :development, :test do
   gem 'pry'
