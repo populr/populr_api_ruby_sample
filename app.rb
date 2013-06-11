@@ -3,6 +3,7 @@ require 'json'
 require 'erb'
 require 'csv'
 
+
 if ENV['DOMAIN'][0..4] == 'https'
   require 'rack/ssl'
   use Rack::SSL
@@ -108,7 +109,7 @@ post "/_/templates/:template_id/csv" do
   }
 
   csv = params['file'][:tempfile].read
-  csv_lines = csv.split("\r")
+  csv_lines = csv.gsub("\r", "").split("\n")
 
   # ensure that the first row of the CSV file hasn't been tampered with
   expected_headers = csv_template_headers(template)
