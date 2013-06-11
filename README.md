@@ -15,7 +15,7 @@ Each of these use cases is explained in further detail below.
 1. Check out the source, `cd` into the project directory and run:
 
     `bundle`
-    
+
     `rackup -p 5000`
 
 2. Open [http://localhost:5000](http://localhost:5000) in a browser.
@@ -29,7 +29,7 @@ Then, to get started as a user:
 
 2. If you haven't already, create a pop template on Populr.me by following the instructions in the [developer documentation](http://developers.populr.me).
 
-3. Paste your API key into the top left of the Populate web page. Your templates should appear in the left sidebar. 
+3. Paste your API key into the top left of the Populate web page. Your templates should appear in the left sidebar.
 
 4. Click one and choose one of the actions in the top menu that appears.
 
@@ -47,16 +47,16 @@ When you create a Pop Form, you'll need to select a delivery action. The availab
 #####Delivery Actions:
 
 
-1. **Publish the Pop:** When they've completed the form, a pop will be automatically created and published. The user will be redirected to their new pop in the browser.  If you check the email delivery box, they will also receive a Populate-branded email with their pop's URL. 
+1. **Publish the Pop:** When they've completed the form, a pop will be automatically created and published. The user will be redirected to their new pop in the browser.  If you check the email delivery box, they will also receive a Populate-branded email with their pop's URL.
 	2. **Password Protection:** If you enable email delivery, you can also enable a password, which is randomly generated and assigned. The password will be sent in the pop email, unless you choose the two factor authentication option. When using two-factor authentiction, the pop link is delivered via email, while the pop's password is delivered via SMS. This ensures the greatest level of security.
 
-		
+
 	 
 2. **Invite to Clone:** When they've completed the form, the user will be redirected to Populr, where they can create an account and continue editing the pop in **their own account**. If you check the email delivery box, they will also receive a Populate-branded email with a URL they can use to create a Populr account and continue editing later.
 
 	*Note: This method is designed for scenarios where you don't need to track what users do with the pops they create. Once the user clones the pop they've created, you can't see changes that are made or control how/when the pop is published.*
 
-		
+
 	 
 3. **Invite to Collaborate:** When they've completed the form, the user will be redirected to Populr, where they can create an account to continue editing the pop in **your account**. If you check the email delivery box, they will also receive a Populate-branded email with a URL they can use to create a Populr account and continue editing later.
 
@@ -70,15 +70,15 @@ Populate's bulk import feature allows you to create a large number of pops very 
 
 1. Identify the fields that you want to customize in each of your pops. That could include the name of a product, a person's name, pictures and documents, and more. Make sure that the template you're using contains API template regions and API tags for each of these fields.
 
-2. Visit the Populate website and follow the instructions at the top of this guide to connect to your account. Select the template from the sidebar and then choose "Bulk Import from CSSV" from the top menu. 
+2. Visit the Populate website and follow the instructions at the top of this guide to connect to your account. Select the template from the sidebar and then choose "Bulk Import from CSSV" from the top menu.
 3. Click the "Download" button. Populate will look at the fields available in the template and provide you with a CSV file you can fill in. It is important that the fields are in the correct order, so you should always use the CSV file provided by Populate.
 
-4. Open the CSV file and take a look at the fields. You should have one field for each of the API regions and tags in your pop. Add a row to the CSV file for each pop you want to create. 
+4. Open the CSV file and take a look at the fields. You should have one field for each of the API regions and tags in your pop. Add a row to the CSV file for each pop you want to create.
 
  		If you'd like to place documents or images in your pops, the documents must be available on the web already (though they may be on a server that is not publicized.) Place the file URL, or file multiple URLs separated with commas, into the appropriate cell in the CSV file. Once Populate runs, the files will be hosted securely at Populr and you can take down the copies you posted on the web for Populate.
 
 		The "Recipient Email" and "Recipient Phone" fields are optional. If you do not provide an email address for a row, no notification will be sent for that pop.
-		
+
 5. Save your changes to the CSV file.
 5. On the Bulk Import page, click "Choose File" and select the CSV file you saved. Choose one of the 	delivery actions (described above) and type your email address.
 6. Click "Process Job"

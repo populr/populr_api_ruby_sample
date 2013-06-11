@@ -30,6 +30,16 @@
       <div ng-show="!selected_api_key" style="z-index:2; position:absolute; width:100%; height:100%; background:rgba(0,0,0,0.7); text-align:center; padding-top:150px;">
         <div style="width:400px; display:inline-block; background-color:white; border-radius:7px; border:1px solid #ccc; padding:15px; box-shadow:1px 1px 20px rgba(0,0,0,0.4);">
           <h2>Welcome to Populate</h2>
+
+          <div class="dk_container dk_shown dk_theme_default" style="width:290px;" ng-show="show_environments">
+            <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
+            <div class="dk_options" style="top: 38px;">
+              <ul class="dk_options_inner">
+                <li ng-repeat="option in environments" class="{true:'dk_option_current',false:''}[env == option]"><a ng-click="select_environment(option)">{{option.name}}</a></li>
+              </ul>
+            </div>
+          </div>
+
           <p>
             Paste your Populr API key below to get started:
           </p>
@@ -59,19 +69,9 @@
           </ul>
         </div>
 
-        <div class="dk_container dk_shown dk_theme_default" style="width:290px;" ng-show="show_environments">
-          <a class="dk_toggle"><span class="dk_label">{{env.name}}</span><span class="select-icon"></span></a>
-          <div class="dk_options" style="top: 38px;">
-            <ul class="dk_options_inner">
-              <li ng-repeat="option in environments" class="{true:'dk_option_current',false:''}[env == option]"><a ng-click="select_environment(option)">{{option.name}}</a></li>
-            </ul>
-          </div>
-        </div>
-
         <p style="margin-top:7px;">
           <a class="btn btn-primary" href="/_/pops/csv?api_key={{api_key}}&api_env={{env.name}}">Download CSV of Pops & Templates</a>
         </p>
-
 
         <p style="text-align:center;">
           Need help? Check out <a target="_blank" href="http://billboard.populr.me/using-populate">this pop!</a>
