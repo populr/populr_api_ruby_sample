@@ -158,9 +158,10 @@ get "/_/pops/csv" do
     else
       pops = @populr.pops
     end
-    csv = ['Pop ID', 'Name', 'Title', 'Slug', 'Password', 'View URL', 'Edit URL'].to_csv
+    csv = ['Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'View URL', 'Edit URL', 'Publish Settings URL'].to_csv
     pops.each do |pop|
-      csv += [pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url, pop.edit_url].to_csv
+      publish_settings_url = "https://populr.me/pops/#{pop._id}/publish_settings"
+      csv += [pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url, pop.edit_url, publish_settings_url].to_csv
     end
     response.headers['content_type'] = "text/csv"
     attachment("Pops.csv")
