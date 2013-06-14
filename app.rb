@@ -109,7 +109,7 @@ post "/_/templates/:template_id/csv" do
   }
 
   csv = params['file'][:tempfile].read
-  csv_lines = csv.gsub("\r", "").split("\n")
+  csv_lines = csv.gsub("\r", "\n").gsub("\n\n", "\n").split("\n")
 
   # ensure that the first row of the CSV file hasn't been tampered with
   expected_headers = csv_template_headers(template)
