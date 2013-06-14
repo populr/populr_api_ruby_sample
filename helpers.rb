@@ -30,6 +30,8 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     for url in urls
       file = tempfile_for_url(url)
       name = URI.decode(url.split('/').last)
+      name = name[0..name.rindex('.')-1] if name.rindex('.')
+
       next unless file
       if p.type_of_unpopulated_region(region) == 'image'
           asset = @populr.images.build(file, name).save!
