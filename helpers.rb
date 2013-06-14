@@ -119,7 +119,7 @@ end
 
 def tempfile_for_url(url)
   return unless url[0..3] == 'http'
-  tempfile = Tempfile.new('filepicker')
+  tempfile = Tempfile.new(['filepicker', File.extname(url)])
   open(tempfile.path, 'w') do |f|
     f << open(url).read
   end
