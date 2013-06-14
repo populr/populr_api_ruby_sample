@@ -19,7 +19,7 @@ class PopCreationJob < PopDeliveryConfiguration
   def create_rows!(csv_lines)
     csv_lines.each do |line|
       row = self.rows.build
-      row.columns = CSV.parse_line(line)
+      row.columns = strip_whitespace(CSV.parse_line(line))
     end
     save!
   end

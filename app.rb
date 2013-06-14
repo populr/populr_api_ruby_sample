@@ -113,9 +113,9 @@ post "/_/templates/:template_id/csv" do
 
   # ensure that the first row of the CSV file hasn't been tampered with
   expected_headers = csv_template_headers(template)
-  actual_headers = csv_lines[0]
+  actual_headers = strip_whitespace(csv_lines[0].parse_csv)
 
-  if expected_headers == actual_headers.parse_csv
+  if expected_headers == actual_headers
     job.create_rows!(csv_lines[1..-1])
     job.create_resque_tasks
     redirect('/thanks.html')
@@ -238,7 +238,6 @@ post "/_/embeds/:embed/build_pop" do
 end
 
 private
-
 
 
 def csv_template_headers(template)

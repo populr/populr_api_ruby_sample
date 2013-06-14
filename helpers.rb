@@ -117,6 +117,14 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   end
 end
 
+def strip_whitespace(columns)
+  # remove any whitespace in the cells. We have to do this because some version of Excel
+  # is changing the columns from "Pop Password,Pop Slug" to "Pop Password, Pop Slug"
+  for column in columns
+    column.strip! unless column.blank?
+  end
+end
+
 def tempfile_for_url(url)
   return unless url[0..3] == 'http'
   tempfile = Tempfile.new(['filepicker', File.extname(url)])
