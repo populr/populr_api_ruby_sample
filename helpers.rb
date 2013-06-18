@@ -127,6 +127,9 @@ end
 
 def tempfile_for_url(url)
   return unless url[0..3] == 'http'
+
+  # make sure all uris are escaped, even if they're not in the excel file
+  url = URI.escape(URI.unescape(url))
   tempfile = Tempfile.new(['filepicker', File.extname(url)])
   open(tempfile.path, 'w') do |f|
     f << open(url).read
