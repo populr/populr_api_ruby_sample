@@ -2,6 +2,7 @@ require 'rubygems'
 require 'json'
 require 'erb'
 require 'csv'
+require 'sinatra/streaming'
 
 
 if ENV['DOMAIN'][0..4] == 'https'
@@ -130,16 +131,17 @@ get "/job_results/:job/:job_hash" do
   populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
 
-  csv = csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns
-  csv = csv.to_csv
-
-  job.rows.each do |row|
-    csv += (row.columns + row.output + state_values_for_pop(populr, row.pop_id)).to_csv
-  end
-
   response.headers['content_type'] = "text/csv"
   attachment("Results.csv")
-  response.write(csv)
+
+  stream do |out|
+    out << (csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns).to_csv
+    job.rows.each do |row|
+      out << (row.columns + row.output + state_values_for_pop(populr, row.pop_id)).to_csv
+    end
+    out.flush
+  end
+
 end
 
 get "/_/pops" do
@@ -160,16 +162,21 @@ get "/_/pops/csv" do
     else
       pops = @populr.pops
     end
-    csv = (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
-    pops.each do |pop|
-      static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
-      state_values = state_values_for_pop(@populr, pop._id)
-      csv += (static_values + state_values).to_csv
-      puts pop._id
-    end
+
     response.headers['content_type'] = "text/csv"
     attachment("Pops.csv")
-    response.write(csv)
+
+    stream(:keep_open) do |out|
+      out << (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
+      pops.each do |pop|
+        static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
+        state_values = state_values_for_pop(@populr, pop._id)
+        out << (static_values + state_values).to_csv
+        out.flush
+      end
+      out.close
+    end
+
   rescue Populr::AccessDenied
     halt JSON.generate({"error" => "API Key Rejected"})
   end
