@@ -138,7 +138,7 @@ get "/job_results/:job/:job_hash" do
     job.rows.each do |row|
       out << (row.columns + row.output + state_values_for_pop(populr, row.pop_id)).to_csv
     end
-    out.flush
+    out.close
   end
 
 end
@@ -171,7 +171,6 @@ get "/_/pops/csv" do
         static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
         state_values = state_values_for_pop(@populr, pop._id)
         out << (static_values + state_values).to_csv
-        out.flush
       end
       out.close
     end
