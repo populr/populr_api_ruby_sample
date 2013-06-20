@@ -47,6 +47,7 @@ class PopCreationWorker
       create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) { |pop_reference, pop|
         flush "processed delivery #{user_email}, #{user_phone}"
         row.output = ['true', pop_reference, pop.password]
+        row.pop_id = pop._id
       }
 
     rescue Exception => e

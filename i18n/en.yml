@@ -1,6 +1,6 @@
 job:
   exception_thrown: "Your job could not be processed successfully. Populate produced the error %1"
-  successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below to view your CSV file with the results appended."
+  successful_with_errors: "Your job has been completed successfully. There were %1 failures. Click the link below for a copy of your CSV file that has been expanded to include the pops that were created. Click this link again in a few days to see updated views and clicks."
 
 tracer_callback:
   sms: "Thanks for viewing your pop. You clicked %1 items."

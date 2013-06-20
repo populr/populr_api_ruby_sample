@@ -130,11 +130,13 @@ get "/job_results/:job/:job_hash" do
   populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
 
-  csv = csv_template_headers(template) + ["Success", "Result", "Password"]
+  csv = csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns
   csv = csv.to_csv
+
   job.rows.each do |row|
-    csv += (row.columns + row.output).to_csv
+    csv += (row.columns + row.output + state_values_for_pop(populr, row.pop_id)).to_csv
   end
+
   response.headers['content_type'] = "text/csv"
   attachment("Results.csv")
   response.write(csv)
@@ -158,12 +160,12 @@ get "/_/pops/csv" do
     else
       pops = @populr.pops
     end
-    csv = ['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'View URL', 'Edit URL', 'Publish Settings URL', 'Views', 'Clicks', 'Analytics URL'].to_csv
+    csv = (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
     pops.each do |pop|
-      publish_settings_url = "https://populr.me/pops/#{pop._id}/publish_settings"
-      analytics_url = "https://populr.me/pops/#{pop._id}/analytics"
-      analytics = pop.analytics
-      csv += [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url, pop.edit_url, publish_settings_url, analytics['views'], analytics['clicks'], analytics_url].to_csv
+      static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
+      state_values = state_values_for_pop(@populr, pop._id)
+      csv += (static_values + state_values).to_csv
+      puts pop._id
     end
     response.headers['content_type'] = "text/csv"
     attachment("Pops.csv")

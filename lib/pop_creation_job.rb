@@ -3,6 +3,7 @@ class PopCreationJobRow
   include Mongoid::Document
   field :columns, :default => []
   field :output, :default => nil
+  field :pop_id, :default => nil
 
   embedded_in :job, :class_name => 'PopCreationJob'
 end
