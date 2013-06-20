@@ -2,7 +2,6 @@ require 'rubygems'
 require 'json'
 require 'erb'
 require 'csv'
-require 'sinatra/streaming'
 
 
 if ENV['DOMAIN'][0..4] == 'https'
