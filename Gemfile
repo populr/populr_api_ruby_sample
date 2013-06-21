@@ -3,10 +3,11 @@ source 'https://rubygems.org'
 
 ruby '1.9.3'
 
+gem 'unicorn'
 gem 'sinatra'
 gem 'sinatra-mongoid', :require => 'sinatra/mongoid'
 gem 'rack-ssl'
-gem 'populr'#, :path => 'vendor/populr_api_ruby'
+gem 'populr'
 gem 'resque', '~> 1.22.0'
 gem 'mongo'
 gem 'rake'

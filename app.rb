@@ -165,7 +165,7 @@ get "/_/pops/csv" do
     response.headers['content_type'] = "text/csv"
     attachment("Pops.csv")
 
-    stream(:keep_open) do |out|
+    stream do |out|
       out << (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
       pops.each do |pop|
         static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
