@@ -54,7 +54,7 @@
 
       <div class="span4 sidebar" style="background-color:#ececec; height:100%; padding-left:10px; padding-top:10px;">
 
-        <p style="padding:3px;" ng-show="selected_api_key">Your API Key:<br><span ng-bind="api_key"></span>. <a href="#" ng-click="selected_api_key = false">EDIT</a></p>
+        <p style="padding:3px;" ng-show="selected_api_key">Your API Key:<br><span ng-bind="api_key"></span><br><a href="#" ng-click="selected_api_key = false">EDIT</a></p>
 
         <div class="todo mrm">
           <ul>
@@ -110,7 +110,7 @@
                     </li>
                     <li ng-class="{true:'active',false:''}[selected_tab == 'view']">
                       <a ng-click="selected_tab='view'">
-                        Finished Pops
+                        Completed Jobs
                       </a>
                     </li>
                   </ul>
@@ -145,7 +145,8 @@
 
               <h3>Create a Form For '{{selected_template.name}}'</h3>
               <p>
-                Pop forms allow users to fill in the fields you defined in your template, and upload images and documents to fill API regions. When the user submits the form, a new pop is created in your account. The pops collected by this form will appear under 'Finished Pops' above.
+                Pop forms allow users to fill in the fields you defined in your template, and upload images and documents to fill API regions. When the user submits the form, a new pop is created in your account.
+
               </p>
               <p>
                 Tips and Tricks:
@@ -205,12 +206,14 @@
 
         <div ng-switch-when="view" class="row">
           <div class="span8">
-            <p>
-              <a class="btn" href="/_/pops/csv?template_id={{selected_template._id}}&api_key={{api_key}}&api_env={{env.name}}">Download CSV of Pops</a>
-            </p>
             <ul>
-              <li ng-repeat="pop in selected_template_pops">
-                <h4><a href="{{pop.published_pop_url}}">{{pop.name}}</a> - {{pop.created_at}} - {{pop.slug}}</h4></li>
+              <li ng-repeat="job in selected_template_jobs" style="padding-bottom:20px;">
+                <h4>{{display_date(job.created_at)}} <em ng-show="job.finished == false">Running</em></h4>
+                Task: {{job.delivery_config.action}} {{job.row_count}} pops<span ng-show="job.delivery_config.password"> with passwords</span><span ng-show="job.delivery_config.confirmation_email"> and deliver pops via email</span>. There were {{job.failed_row_count}} failures.
+                <div>
+                <a ng-click="delete_job_pops(job)">Delete All Pops</a> | <a href="/job_results/{{job._id}}/{{job.hash}}" ng-show="job.hash" target="_blank">Download Results & Pop Analytics</a>
+              </div>
+              </li>
             </ul>
 
           </div>

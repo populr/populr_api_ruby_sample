@@ -25,11 +25,21 @@ class PopCreationJob < PopDeliveryConfiguration
     save!
   end
 
+  def as_json(options = {})
+    json = super(options)
+    json[:created_at] = _id.generation_time
+    json[:row_count] = rows.length
+    json[:_id] = _id.to_s
+    json[:hash] = self.hash
+    json.delete('rows')
+    json
+  end
+
   def create_resque_tasks
     self.hash ||= (0...8).map{(65+rand(26)).chr}.join
     self.save!
 
-    rows.each do | row|
+    rows.each do |row|
       Resque.enqueue(PopCreationWorker, self._id, row._id)
     end
   end

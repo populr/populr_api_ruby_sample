@@ -8,6 +8,7 @@ def url_for_environment_named(env)
 end
 
 def create_and_send_pop(template, data, delivery, user_email, user_phone)
+begin
   # First, create a new pop from the template
   p = Pop.new(template)
 
@@ -51,11 +52,6 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
     p.populate_region(region, asset)
   end
 
-  # As a sanity check, make sure we've filled all the regions and tags.
-  # Populr won't let us publish a pop with unpopulated areas left in it!
-  unless p.unpopulated_api_tags.count == 0 && p.unpopulated_api_regions.count == 0
-    halt JSON.generate({"error" => "Please fill all of the tags and regions."})
-  end
 
   # Save the pop. This commits our changes above.
   if delivery['password']
@@ -115,6 +111,11 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   else
     return JSON.generate({"error" => "Invalid Embed Action"})
   end
+rescue Populr::UnexpectedResponse, Populr::APIError => e
+  puts e.to_s
+  p.destroy if p
+  raise e
+end
 end
 
 def strip_whitespace(columns)
@@ -178,5 +179,8 @@ def state_values_for_pop(populr, pop_id)
   pop = Pop.new(populr)
   pop._id = pop_id
   analytics = pop.analytics
+
   return [pop.edit_url, publish_settings_url, analytics_url, analytics['views'], analytics['clicks']]
+rescue Populr::ResourceNotFound
+  return false
 end

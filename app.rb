@@ -136,7 +136,12 @@ get "/job_results/:job/:job_hash" do
   stream do |out|
     out << (csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns).to_csv
     job.rows.each do |row|
-      out << (row.columns + row.output + state_values_for_pop(populr, row.pop_id)).to_csv
+      values = state_values_for_pop(populr, row.pop_id)
+      if values
+        out << (row.columns + row.output + values).to_csv
+      else
+        out << ['Pop Deleted'].to_csv
+      end
     end
     out.close
   end
@@ -177,6 +182,42 @@ get "/_/pops/csv" do
 
   rescue Populr::AccessDenied
     halt JSON.generate({"error" => "API Key Rejected"})
+  end
+end
+
+get "/_/jobs" do
+  find_api_connection
+  begin
+    collection_listing(PopCreationJob.where(:api_key => params[:api_key], :template_id => params[:template_id]).order_by(:_id.desc))
+  rescue Populr::AccessDenied
+    halt JSON.generate({"error" => "API Key Rejected"})
+  end
+end
+
+delete "/_/jobs" do
+  find_api_connection
+  begin
+    job = PopCreationJob.where(:api_key => params[:api_key], :_id => params[:job_id]).first
+
+    # delete all the pops
+    job.rows.each do |row|
+      begin
+        pop = @populr.pops.find(row.pop_id)
+        pop.destroy if pop
+      rescue Populr::ResourceNotFound
+        puts "Could not delete pop #{row.pop_id}. Already deleted!"
+      end
+    end
+
+    # delete the job
+    job.destroy
+
+    '{"success": true}'
+
+  rescue Populr::AccessDenied
+    halt JSON.generate({"error" => "API Key Rejected"})
+  rescue Populr::APIError => e
+    halt JSON.generate({"error" => "An error occurred! #{e.message}"})
   end
 end
 
