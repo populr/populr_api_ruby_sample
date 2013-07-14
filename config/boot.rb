@@ -27,21 +27,19 @@ R18n.set('en')
 t = R18n.t
 
 
-unless ENV["MONGO_HOST"]
-  ENV["MONGO_HOST"] = "localhost:27017"
-  ENV["MONGO_DB"] = "my_db"
+ENV["MONGO_HOST"] ||= "localhost:27017"
+ENV["MONGO_DB"] ||= "my_db"
 
-  ENV["SMTP_AUTH_USER"] = ""
-  ENV["SMTP_AUTH_PASSWORD"] = ""
-  ENV["SMTP_MAILHUB"] = "smtp.sendgrid.net:587"
+ENV["SMTP_AUTH_USER"] ||= ""
+ENV["SMTP_AUTH_PASSWORD"] ||= ""
+ENV["SMTP_MAILHUB"] ||= "smtp.sendgrid.net:587"
 
-  ENV["TWILLIO_API_KEY"] = ''
-  ENV["TWILLIO_API_SECRET"] = ''
-  ENV["TWILLIO_NUMBER"] = '+15404405900'
+ENV["TWILLIO_API_KEY"] ||= ''
+ENV["TWILLIO_API_SECRET"] ||= ''
+ENV["TWILLIO_NUMBER"] ||= '+15404405900'
 
-  ENV["REDISTOGO_URL"] = 'redis://localhost:6379/'
-  ENV["DOMAIN"] = 'http://localhost:5000'
-end
+ENV["REDISTOGO_URL"] ||= 'redis://localhost:6379/'
+ENV["DOMAIN"] ||= 'http://localhost:5000'
 
 Mongoid.configure do |config|
   config.sessions = {

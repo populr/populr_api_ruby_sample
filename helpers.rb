@@ -8,7 +8,6 @@ def url_for_environment_named(env)
 end
 
 def create_and_send_pop(template, data, delivery, user_email, user_phone)
-begin
   # First, create a new pop from the template
   p = Pop.new(template)
 
@@ -58,6 +57,7 @@ begin
     p.password = data['password']
     p.password ||= (0...5).map{(65+rand(26)).chr}.join
   end
+
   p.save!
 
   # Publish the pop. This makes it available at http://p.domain/p.slug.
@@ -115,7 +115,6 @@ rescue Populr::UnexpectedResponse, Populr::APIError => e
   puts e.to_s
   p.destroy if p
   raise e
-end
 end
 
 def strip_whitespace(columns)

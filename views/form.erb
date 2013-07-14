@@ -188,7 +188,7 @@
         </div>
         <div ng-switch-default>
           Select one or more {{attributes['type']}}s below.
-          <input type="filepicker-dragdrop" data-fp-apikey="ANrdKYEAlQPevGkh6CbOqz" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
+          <input type="filepicker-dragdrop" data-fp-apikey="<%= ENV['FILEPICKER_API_KEY'] %>" data-fp-mimetypes="*/*" data-fp-container="modal" data-fp-multiple="true" onchange="angular.element(this).scope().files_selected('{{key}}', event.fpfiles)">
         </div>
       </div>
     </div>
@@ -216,7 +216,7 @@
 
     <div style="padding-top:25px;">
       <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">{{creation_description()}}</a>
-      <a ng-show="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">Popping...</a>
+      <a ng-show="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">Working...</a>
     </div>
 
 </body>

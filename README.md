@@ -22,6 +22,8 @@ Each of these use cases is explained in further detail below.
 
 3. Select 'localhost' from the enviornments dropdown on the left.
 
+4. VVERBOSE=1 QUEUE=pop_task bundle exec rake resque:work
+
 
 Then, to get started as a user:
 
