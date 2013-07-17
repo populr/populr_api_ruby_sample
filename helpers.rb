@@ -166,10 +166,11 @@ def sanitize_phone_number(phone)
 end
 
 def state_columns
-  ['Edit URL', 'Publish Settings URL', 'Analytics URL', 'Views', 'Clicks']
+  ['Edit URL', 'Publish Settings URL', 'Analytics URL', 'Views', 'Clicks'].concat(@assets)
 end
 
 def state_values_for_pop(populr, pop_id)
+  @assets ||= []
   return [] unless pop_id && populr
 
   publish_settings_url = "https://populr.me/pops/#{pop_id}/publish_settings"
@@ -179,7 +180,34 @@ def state_values_for_pop(populr, pop_id)
   pop._id = pop_id
   analytics = pop.analytics
 
-  return [pop.edit_url, publish_settings_url, analytics_url, analytics['views'], analytics['clicks']]
+  asset_clicks = []
+
+  if analytics['direct_tracer'] && analytics['direct_tracer']['analytics']
+    direct_tracer_analytics = analytics['direct_tracer']['analytics']
+    direct_tracer_analytics.keys.each do |key|
+      id, kind = key.split(':')
+
+      if kind == 'c'
+        clicks = direct_tracer_analytics[id + ':c']
+        url = direct_tracer_analytics[id + ':u']
+        name = direct_tracer_analytics[id + ':n']
+        header = "#{name} | #{url}"
+
+        if index = @assets.index(header)
+          asset_clicks[index] = clicks
+        else
+          @assets << header
+          asset_clicks << clicks
+        end
+
+      end
+    end
+  end
+
+
+
+
+  [pop.edit_url, publish_settings_url, analytics_url, analytics['views'], analytics['clicks']].concat(asset_clicks)
 rescue Populr::ResourceNotFound
-  return false
+  false
 end

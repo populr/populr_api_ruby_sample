@@ -3,6 +3,10 @@ require 'json'
 require 'erb'
 require 'csv'
 
+# require 'pry'
+# require 'pry-nav'
+# require 'pry-stack_explorer'
+
 
 if ENV['DOMAIN'][0..4] == 'https'
   require 'rack/ssl'
@@ -133,8 +137,7 @@ get "/job_results/:job/:job_hash" do
   response.headers['content_type'] = "text/csv"
   attachment("Results.csv")
 
-  stream do |out|
-    out << (csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns).to_csv
+  build_csv do |out|
     job.rows.each do |row|
       values = state_values_for_pop(populr, row.pop_id)
       if values
@@ -143,7 +146,7 @@ get "/job_results/:job/:job_hash" do
         out << ['Pop Deleted'].to_csv
       end
     end
-    out.close
+    (csv_template_headers(template) + ['Success', 'Result', 'Password'] + state_columns).to_csv
   end
 
 end
@@ -170,14 +173,13 @@ get "/_/pops/csv" do
     response.headers['content_type'] = "text/csv"
     attachment("Pops.csv")
 
-    stream do |out|
-      out << (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
+    build_csv do |out|
       pops.each do |pop|
         static_values = [pop.created_at.to_s, pop._id, pop.name, pop.title, pop.slug, pop.password, pop.published_pop_url]
         state_values = state_values_for_pop(@populr, pop._id)
         out << (static_values + state_values).to_csv
       end
-      out.close
+      (['Creation Date', 'Pop ID', 'Pop Name', 'Title', 'Slug', 'Password', 'Published URL'] + state_columns).to_csv
     end
 
   rescue Populr::AccessDenied
@@ -287,8 +289,30 @@ post "/_/embeds/:embed/build_pop" do
   end
 end
 
+
 private
 
+def build_csv(&block)
+    header_file = Tempfile.new('data')
+    data_file = Tempfile.new('data')
+
+    headers = yield(data_file)
+
+    header_file.write(headers)
+
+    header_file.rewind
+    data_file.rewind
+
+    complete_csv = header_file.read + data_file.read
+
+    header_file.close
+    header_file.unlink
+
+    data_file.close
+    data_file.unlink
+
+    complete_csv
+end
 
 def csv_template_headers(template)
   headers = ["Pop Slug", "Pop Password"]
