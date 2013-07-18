@@ -27,13 +27,17 @@ class PopCreationWorker
         data['tags'][tag] = row.columns[column_index]
         column_index += 1
       end
+
+      url_to_column_index_map = {}
       for region, info in @template.api_regions
         if info['type'] == 'embed'
           data['embed_regions'][region] ||= []
           data['embed_regions'][region].push(row.columns[column_index])
         else
+          urls = row.columns[column_index].split(',')
+          urls.each { |url| url_to_column_index_map[url] = column_index }
           data['file_regions'][region] ||= []
-          data['file_regions'][region].concat(row.columns[column_index].split(','))
+          data['file_regions'][region].concat(urls)
         end
         column_index += 1
       end
@@ -44,11 +48,14 @@ class PopCreationWorker
 
       flush "processing row: #{row.to_json}"
 
-      create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) { |pop_reference, pop|
+      create_and_send_pop(@template, data, job.delivery_config, user_email, user_phone) do |pop_reference, pop, url_to_asset_id_map|
         flush "processed delivery #{user_email}, #{user_phone}"
         row.output = ['true', pop_reference, pop.password]
         row.pop_id = pop._id
-      }
+        url_to_asset_id_map.each do |url, asset_id|
+          row.asset_id_to_column_index_map[asset_id] = url_to_column_index_map[url]
+        end
+      end
 
     rescue Exception => e
       puts e.to_s

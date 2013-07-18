@@ -133,13 +133,14 @@ get "/job_results/:job/:job_hash" do
   return halt("Hash doesn't match.") unless job.hash == params[:job_hash]
   populr = Populr.new(job.api_key, url_for_environment_named(job.api_env))
   template = populr.templates.find(job.template_id)
+  column_headers = csv_template_headers(template)
 
   response.headers['content_type'] = "text/csv"
   attachment("Results.csv")
 
   build_csv do |out|
     job.rows.each do |row|
-      values = state_values_for_pop(populr, row.pop_id)
+      values = state_values_for_pop(populr, row.pop_id, column_headers, row.asset_id_to_column_index_map)
       if values
         out << (row.columns + row.output + values).to_csv
       else
@@ -165,7 +166,8 @@ get "/_/pops/csv" do
   find_api_connection
   begin
     if params[:template_id]
-      pops = @populr.templates.find(params[:template_id]).pops
+      template = @populr.templates.find(params[:template_id])
+      pops = template.pops
     else
       pops = @populr.pops
     end

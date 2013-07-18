@@ -25,6 +25,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
   # us a URL to each file, and we need to create Populr assets
   # for each one. Each region on Populr can accept multiple
   # images / documents, so we allow for multiple selection.
+  url_to_asset_id_map = {}
   for region,urls in data['file_regions']
     assets = []
     for url in urls
@@ -34,10 +35,13 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
 
       next unless file
       if p.type_of_unpopulated_region(region) == 'image'
-          asset = @populr.images.build(file, name).save!
+        asset = @populr.images.build(file, name).save!
       elsif p.type_of_unpopulated_region(region) == 'document'
-          asset = @populr.documents.build(file, name).save!
+        asset = @populr.documents.build(file, name).save!
       end
+
+      url_to_asset_id_map[url] = asset._id
+
       assets.push(asset)
     end
     p.populate_region(region, assets)
@@ -81,10 +85,10 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
         })
       end
     end
-    yield p.published_pop_url, p
+    yield p.published_pop_url, p, url_to_asset_id_map
 
   elsif delivery['action'] == 'create'
-    yield p.edit_url, p
+    yield p.edit_url, p, url_to_asset_id_map
 
   elsif delivery['action'] == 'clone'
     p.enable_cloning!
@@ -95,7 +99,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
         :password => nil
       })
     end
-    yield p.clone_link_url, p
+    yield p.clone_link_url, p, url_to_asset_id_map
 
   elsif delivery['action'] == 'collaborate'
     p.enable_collaboration!
@@ -106,7 +110,7 @@ def create_and_send_pop(template, data, delivery, user_email, user_phone)
         :password => nil
       })
     end
-    yield p.collaboration_link_url, p
+    yield p.collaboration_link_url, p, url_to_asset_id_map
 
   else
     return JSON.generate({"error" => "Invalid Embed Action"})
@@ -169,7 +173,7 @@ def state_columns
   ['Edit URL', 'Publish Settings URL', 'Analytics URL', 'Views', 'Clicks'].concat(@assets)
 end
 
-def state_values_for_pop(populr, pop_id)
+def state_values_for_pop(populr, pop_id, column_headers=[], asset_id_to_column_index_map={})
   @assets ||= []
   return [] unless pop_id && populr
 
@@ -191,7 +195,7 @@ def state_values_for_pop(populr, pop_id)
         clicks = direct_tracer_analytics[id + ':c']
         url = direct_tracer_analytics[id + ':u']
         name = direct_tracer_analytics[id + ':n']
-        header = "#{name} | #{url}"
+        header = matching_column_name(column_headers, asset_id_to_column_index_map, name, url)
 
         if index = @assets.index(header)
           asset_clicks[index] = clicks
@@ -204,10 +208,27 @@ def state_values_for_pop(populr, pop_id)
     end
   end
 
-
-
-
   [pop.edit_url, publish_settings_url, analytics_url, analytics['views'], analytics['clicks']].concat(asset_clicks)
 rescue Populr::ResourceNotFound
   false
+end
+
+def matching_column_name(column_headers, asset_id_to_column_index_map, asset_name, asset_url)
+  if asset_url
+    uri = URI.parse(asset_url)
+    asset_id = File.basename(uri.path, '.*')
+    column_index = asset_id_to_column_index_map[asset_id]
+  else
+    column_index = nil
+  end
+
+  'Asset Clicks: ' +  if column_index
+                        column_headers[column_index]
+
+                      elsif asset_name.nil? || asset_url.nil?
+                        "#{asset_name}#{asset_url}"
+
+                      else
+                        "#{asset_name} | #{asset_url}"
+                      end
 end

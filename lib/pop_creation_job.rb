@@ -1,19 +1,20 @@
 
 class PopCreationJobRow
   include Mongoid::Document
-  field :columns, :default => []
-  field :output, :default => nil
-  field :pop_id, :default => nil
+  field :columns, :type => Array, :default => []
+  field :output, :type => Array, :default => nil
+  field :pop_id, :type => String, :default => nil
+  field :asset_id_to_column_index_map, :type => Hash, :default => {}
 
   embedded_in :job, :class_name => 'PopCreationJob'
 end
 
 class PopCreationJob < PopDeliveryConfiguration
-  field :finished, :default => false
-  field :started, :default => false
-  field :failed_row_count, :default => 0
-  field :hash
-  field :email
+  field :finished, :type => Boolean, :default => false
+  field :started, :type => Boolean, :default => false
+  field :failed_row_count, :type => Integer, :default => 0
+  field :hash, :type => String
+  field :email, :type => String
 
   embeds_many :rows, :class_name => 'PopCreationJobRow'
 

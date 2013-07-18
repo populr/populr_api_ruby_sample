@@ -8,6 +8,8 @@ The Pop Builder sample app allows you to see the templates in your account and p
 
 Each of these use cases is explained in further detail below.
 
+## Deploying
+
 ### Getting Started
 
  The app is written in Sinatra, uses AngularJS on the front-end, and uses Filepicker.io to enable image/file uploads. If you are interested in running your own copy of Populate:
