@@ -8,13 +8,11 @@ angular.module('myApp.controllers', []).
     $scope.selected_tab = 'create';
     $scope.selected_embed = null;
     $scope.selected_template_jobs = null;
-    $scope.show_environments = window.location.href.indexOf('localhost') != -1
-    $scope.environments = [{name: 'production'},{name: 'staging'},{name: 'localhost'}]
     $scope.csv_action = null;
     $scope.csv_email = null;
 
     $scope.fetch_templates = function() {
-      Templates.index({api_key:$scope.api_key, api_env: $scope.env.name}, function(templates){
+      Templates.index({api_key:$scope.api_key, api_env: $scope.environment}, function(templates){
         $scope.templates = templates
       });
     }
@@ -36,8 +34,8 @@ angular.module('myApp.controllers', []).
         $('#api-key-input').focus();
       }
     }
-    $scope.select_environment = function(option) {
-      $scope.env = option;
+    $scope.select_environment = function(environment) {
+      $scope.environment = environment;
       $scope.selected_template = null;
       $scope.selected_embed = null;
       $scope.selected_template_pops = [];
@@ -54,17 +52,17 @@ angular.module('myApp.controllers', []).
       $scope.selected_template = template;
       $scope.selected_embed = {};
       $scope.selected_template_pops = [];
-      Pops.index({api_key:$scope.api_key, api_env: $scope.env.name, template_id: template._id}, function(pops) {
+      Pops.index({api_key:$scope.api_key, api_env: $scope.environment, template_id: template._id}, function(pops) {
         $scope.selected_template_pops = pops;
       });
-      Jobs.index({api_key:$scope.api_key, api_env: $scope.env.name, template_id: template._id}, function(jobs) {
+      Jobs.index({api_key:$scope.api_key, api_env: $scope.environment, template_id: template._id}, function(jobs) {
         $scope.selected_template_jobs = jobs;
       })
     }
 
     $scope.delete_job_pops = function(job) {
       if (confirm('Are you sure you want to unpublish and delete the ' + job.row_count + ' pops from this job? They will be immediately taken down from the web and this action cannot be undone. It may take a few seconds to delete all the pops. Please be patient!')) {
-        Jobs.destroy({api_key:$scope.api_key, api_env: $scope.env.name, job_id: job._id}, function() {
+        Jobs.destroy({api_key:$scope.api_key, api_env: $scope.environment, job_id: job._id}, function() {
           alert('Finished! The pops have been unpublished and deleted.');
 
           index = $scope.selected_template_jobs.indexOf(job)
@@ -77,7 +75,7 @@ angular.module('myApp.controllers', []).
     $scope.create_embed = function() {
       Embeds.create({
         api_key: $scope.api_key,
-        api_env: $scope.env.name,
+        api_env: $scope.environment,
         action: $scope.selected_embed.action,
         confirmation: $scope.selected_embed.confirmation,
         password_enabled:  $scope.selected_embed.password_enabled,
@@ -109,6 +107,13 @@ angular.module('myApp.controllers', []).
       return true;
     }
 
-    $scope.select_environment($scope.environments[0]);
+    if window.location.host.indexOf('localhost') >= 0
+      environment = 'localhost'
+    else if window.location.host.indexOf('staging') >= 0
+      environment = 'staging'
+    else
+      environment = 'production'
+
+    $scope.select_environment(environment);
 
   }]);
