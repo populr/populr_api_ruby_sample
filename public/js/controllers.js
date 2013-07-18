@@ -107,12 +107,13 @@ angular.module('myApp.controllers', []).
       return true;
     }
 
-    if window.location.host.indexOf('localhost') >= 0
-      environment = 'localhost'
-    else if window.location.host.indexOf('staging') >= 0
-      environment = 'staging'
-    else
-      environment = 'production'
+    if (window.location.host.indexOf('localhost') >= 0) {
+      environment = 'localhost';
+    } else if (window.location.host.indexOf('staging') >= 0) {
+      environment = 'staging';
+    } else {
+      environment = 'production';
+    }
 
     $scope.select_environment(environment);
 
