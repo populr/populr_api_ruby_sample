@@ -123,8 +123,10 @@
 
               <h4>Embed this Form:</h4>
               <textarea onclick="$(this).select();" style="width:700px; height:40px;">
-<iframe src="{{populate_url()}}/forms/{{selected_embed._id}}" style="width:700px; height:800px;" seamless></iframe>
-              </textarea>
+<iframe id="populate_form" src="{{populate_url()}}/forms/{{selected_embed._id}}" style="width:100%; height:800px;" seamless></iframe><script>
+receivePopulateMessage = function (e) { if (e.data.indexOf('populate|') == 0) { $('#populate_form').height(parseInt(e.data.split('|').pop(), 10)); } }; if (typeof window.postMessage == 'function') { window.addEventListener('message', receivePopulateMessage, false); } else if (typeof window.postMessage == 'object') { window.attachEvent('onmessage', receivePopulateMessage); }
+</script>
+</textarea>
 
               <h4>Preview:</h4>
               <iframe ng-src="/forms/{{selected_embed._id}}" src="/" style="width:710px; height:600px; border:2px solid #dce4ec;">

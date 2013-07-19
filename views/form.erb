@@ -12,14 +12,34 @@
   <script src="/js/flat-ui/jquery.placeholder.js"></script>
 
   <style>
+  html, body {
+    background: transparent;
+    overflow: hidden;
+  }
+  .form {
+    padding-bottom: 10px;
+  }
   .api-region.error > div {
-    margin-right:7px;
-    padding:7px;
+    margin-right: 7px;
+    padding: 7px;
     border: 2px solid #e74c3c;
-    border-radius:7px;
+    border-radius: 7px;
   }
   </style>
   <script>
+
+    $(document).ready(function() {
+      var counter = 0;
+      resize = function() {
+        window.parent.postMessage('populate|' + String($('.form').outerHeight()), '*');
+      };
+      resize();
+      var interval_id = setInterval(function() {
+        resize();
+        if (++counter == 5) clearInterval(interval_id);
+      }, 1000);
+    });
+
     // Declare app level module which depends on filters, and services
     angular.module('myApp', ['myApp.directives', 'myApp.controllers']);
     angular.module('myApp.directives', []).
@@ -43,13 +63,17 @@
 
 
   angular.module('myApp.controllers', []).
-    controller('FormController', ['$scope', '$http', function($scope, $http) {
+    controller('FormController', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
 
       $scope.pop_data = {slug: '', tags: {}, file_regions: {}, embed_regions: {}};
       $scope.pop_errors = {tags: {}, regions: {}};
       $scope.creating = false;
       $scope.embed = <%= @embed.as_json(:except=>[:api_key, :api_environment, :template_id]).to_json %>;
       $scope.template = <%= @template.to_json %>;
+
+
+
+
 
       $scope.class_for_tag_input = function(tag) {
         return ($scope.pop_errors.tags[tag]) ? 'error' : '';
@@ -164,7 +188,7 @@
 
 </head>
 <body>
-  <div ng-controller="FormController" style="padding:5px; margin:auto; max-width:620px; margin-top:20px; min-height:100%;">
+  <div class="form" ng-controller="FormController">
 
     <% if @embed.delivery_config['delivery_action'] == 'publish' %>
       <div class="control-group" style="padding-right:20px;">
@@ -214,7 +238,7 @@
       <hr></hr>
     </div>
 
-    <div style="padding-top:25px;">
+    <div>
       <a ng-hide="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">{{creation_description()}}</a>
       <a ng-show="creating" class="btn btn-primary btn-large btn-block" ng-click="create()">Working...</a>
     </div>
