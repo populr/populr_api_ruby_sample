@@ -117,8 +117,7 @@
             return alert(response.error);
           else {
             if (/^https:\/\/(www\.)?populr\.me\/edit\//.test(response.redirect_url)) {
-              window.open(response.redirect_url, '_blank');
-              window.location = window.location.protocol + '//' + window.location.host + '/editor_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url)
+              window.location = window.location.protocol + '//' + window.location.host + '/editor_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url);
             } else {
               window.location = response.redirect_url;
             }

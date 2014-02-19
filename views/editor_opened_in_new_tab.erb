@@ -64,7 +64,7 @@
       is_private_pop: false,
       is_preview: null,
       on_revision_navigator: false,
-      suppress_analytics: null,
+      suppress_analytics: true,
       background: {
         image: null,
         style: "fill",
@@ -82,7 +82,7 @@
   "//djtagfocfldiq.cloudfront.net/assets/published_init-b7109176783b8a310f1fc049f3edc753.js"
   type="text/javascript">
 </script>
-  <script src="/themes/center/js/main.js?v=16" type="text/javascript">
+  <script src="//populr.me/themes/center/js/main.js?v=16" type="text/javascript">
 </script>
   <script type="text/javascript">
 //<![CDATA[
@@ -99,7 +99,7 @@
         <div id="main-content" class="clearfix">
           <div class="pop-title-wrapper">
             <div class="text-align-center">
-              <h1 id="pop-title"><b>The contents have been submitted!</b></h1>
+              <h1 id="pop-title"><b></b></h1>
             </div>
           </div>
 
@@ -108,27 +108,8 @@
             data-x="0" data-y="0">
               <div class="asset asset-type-text asset-size-l" data-region-id="0">
                 <div class="asset-inner">
-                  <h2 class="asset-title">An editable version of your page should now be
-                  open within a new tab in your browser. &nbsp;</h2>
-
+                  <h2 class="asset-title">Your page has been created. <a href="<%= @editor_url %>" target="_blank">Click to edit it now!</a></h2>
                   <div class="content">
-                    <div class="body">
-                      <p><b>Did your page not open up in a new tab? (see below for
-                      instructions)</b></p>
-
-                      <p>A pop-up blocker may have prevented a new tab to open within
-                      your browser. If this is the case, please follow the steps below to
-                      ensure you can access the page.</p>
-
-                      <ol>
-                        <li>Turn off pop-up blocker within your browser.</li>
-
-                        <li><a href="<%= @editor_url %>">Click to re-open the page</a> in a new tab
-                        within your browser.</li>
-
-                        <li>That's it. You're done!</li>
-                      </ol>
-                    </div>
                   </div>
                 </div>
               </div>
