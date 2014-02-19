@@ -116,6 +116,7 @@
           if (response.error)
             return alert(response.error);
           else {
+            debugger
             if (/^https:\/\/editor-[a-z0-9]+\.populr\.me/.test(response.redirect_url)) {
               window.open(response.redirect_url, '_blank');
               window.location = window.location.protocol + '//' + window.location.host + '/editor_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url)
