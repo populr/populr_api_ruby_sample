@@ -108,15 +108,20 @@
 
       $scope.create = function() {
         if (!$scope.check_form_valid(true))
-          return
+          return;
 
         $scope.creating = true;
         $http.post('/_/embeds/' + $scope.embed._id + '/build_pop', {pop_data: $scope.pop_data}).success(function(response){
           $scope.creating = false;
           if (response.error)
-            return alert(response.error)
+            return alert(response.error);
           else {
-            window.location = response.redirect_url
+            if (/^https:\/\/editor-[a-z0-9]+\.populr\.me/.test(response.redirect_url)) {
+              window.open(response.redirect_url, '_blank');
+              window.location = window.location.protocol + '//' + window.location.host + '/editor_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url)
+            } else {
+              window.location = response.redirect_url;
+            }
           }
         }).error(function(err) {
           alert(err);

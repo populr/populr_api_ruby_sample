@@ -291,6 +291,10 @@ post "/_/embeds/:embed/build_pop" do
   end
 end
 
+get "/editor_opened_in_new_tab" do
+  @editor_url = params[:url]
+  erb :editor_opened_in_new_tab
+end
 
 private
 
