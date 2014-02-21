@@ -116,8 +116,12 @@
           if (response.error)
             return alert(response.error);
           else {
-            if (/^https:\/\/(www\.)?populr\.me\/edit\//.test(response.redirect_url)) {
+            if (/^https:\/\/(www\.)?populr\.me\/clone\//.test(response.redirect_url)) {
+              window.location = window.location.protocol + '//' + window.location.host + '/clone_link_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url);
+
+            } else if (/^https:\/\/(www\.)?populr\.me\/edit\//.test(response.redirect_url)) {
               window.location = window.location.protocol + '//' + window.location.host + '/editor_opened_in_new_tab?url=' + encodeURIComponent(response.redirect_url);
+
             } else {
               window.location = response.redirect_url;
             }

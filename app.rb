@@ -296,6 +296,11 @@ get "/editor_opened_in_new_tab" do
   erb :editor_opened_in_new_tab
 end
 
+get "/clone_link_opened_in_new_tab" do
+  @editor_url = params[:url]
+  erb :clone_link_opened_in_new_tab
+end
+
 private
 
 def build_csv(&block)
